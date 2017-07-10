@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
+import os
+import json
+from kb_ballgown.core.ballgown_util import BallgownUtil
 #END_HEADER
 
 
@@ -29,6 +32,9 @@ class kb_ballgown:
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
+        self.config = config
+        self.config['SDK_CALLBACK_URL'] = os.environ['SDK_CALLBACK_URL']
+        self.config['KB_AUTH_TOKEN'] = os.environ['KB_AUTH_TOKEN']
         #END_CONSTRUCTOR
         pass
 
@@ -68,9 +74,23 @@ class kb_ballgown:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run_ballgown_app
-        print('>>>>>>>>>>>>>>>>>>>>came here!')
-        return ['myResult!']
+        print '--->\nRunning kb_ballgown.run_ballgown_app\nparams:'
+        print json.dumps(params, indent=1)
+
+        for key, value in params.iteritems():
+            if isinstance(value, basestring):
+                params[key] = value.strip()
+
+        ballgown_runner = BallgownUtil(self.config)
+        returnVal = ballgown_runner.run_ballgown_app(params)
         #END run_ballgown_app
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method run_deseq2_app return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
 
 
     def status(self, ctx):
