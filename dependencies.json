@@ -11,6 +11,10 @@
   "type" : "sdk",
   "version_tag" : "release"
 }, {
+  "module_name" : "KBaseFeatureValues",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
   "module_name" : "KBaseReport",
   "type" : "sdk",
   "version_tag" : "release"
