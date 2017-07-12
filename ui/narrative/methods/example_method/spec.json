@@ -1,0 +1,156 @@
+{
+  "ver" : "1.0.0",
+  "authors" : [ ],
+  "contact" : "help@kbase.us",
+  "visible" : true,
+  "categories" : ["active","expression"],
+  "widgets" : {
+    "input" : "kbaseNarrativeMethodInput",
+    "output" : "no-display"
+  },
+  "parameters" : [ {
+    "id" : "expressionset_ref",
+    "optional" : false,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "" ],
+    "field_type" : "text",
+    "text_options" : {
+      "valid_ws_types" : ["KBaseRNASeq.RNASeqExpressionSet"]
+    }
+  },{
+    "id": "condition_labels",
+    "optional": false,
+    "advanced": false,
+    "allow_multiple": true,
+    "default_values": [""],
+    "field_type": "text",
+    "text_options": {}
+  },{
+    "id" : "diff_expression_obj_name",
+    "optional" : false,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "" ],
+    "field_type" : "text",
+    "text_options" : {
+      "valid_ws_types" : ["KBaseRNASeq.RNASeqDifferentialExpression"],
+      "is_output_name": true
+    }
+  },{
+    "id" : "filtered_expression_matrix_name",
+    "optional" : false,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "" ],
+    "field_type" : "text",
+    "text_options" : {
+      "valid_ws_types" : ["KBaseFeatureValues.ExpressionMatrix"],
+      "is_output_name": true
+    }
+  },{
+    "id" : "fold_change_cutoff",
+    "optional" : false,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "1.5" ],
+    "field_type" : "text",
+    "text_options" : {
+      "validate_as": "float"
+    }
+  },{
+    "id" : "alpha_cutoff",
+    "optional" : false,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "0.05" ],
+    "field_type" : "text",
+    "text_options" : {
+      "validate_as": "float"
+    }
+  }],
+  "behavior" : {
+    "service-mapping" : {
+      "url" : "",
+      "name" : "kb_ballgown",
+      "method" : "run_ballgown_app",
+      "input_mapping" : [
+        {
+          "narrative_system_variable": "workspace",
+          "target_property" : "workspace_name"
+        },
+        {
+          "constant_value"  : 4,
+          "target_property" : "num_threads"
+        },
+        {
+          "constant_value"  : "log2",
+          "target_property" : "fold_scale_type"
+        },
+        {
+          "input_parameter" : "expressionset_ref",
+          "target_type_transform": "resolved-ref",
+          "target_property" : "expressionset_ref"
+        },
+        {
+          "input_parameter" : "condition_labels",
+          "target_property" : "condition_labels"
+        },
+        {
+          "input_parameter" : "alpha_cutoff",
+          "target_property" : "alpha_cutoff"
+        },
+        {
+          "input_parameter" : "fold_change_cutoff",
+          "target_property" : "fold_change_cutoff"
+        },
+        {
+          "input_parameter" : "filtered_expression_matrix_name",
+          "target_property" : "filtered_expression_matrix_name"
+        },
+        {
+          "input_parameter" : "diff_expression_obj_name",
+          "target_property" : "diff_expression_obj_name"
+        }],
+      "output_mapping" : [
+        {
+          "input_parameter" : "diff_expression_obj_name",
+          "target_property" : "diff_expression_obj_name"
+        },
+        {
+          "input_parameter" : "filtered_expression_matrix_name",
+          "target_property" : "filtered_expression_matrix_name"
+        },
+        {
+          "service_method_output_path": [0, "result_directory"],
+          "target_property": "result_directory"
+        },
+        {
+          "service_method_output_path": [0,"diff_expression_obj_ref"],
+          "target_property": "diff_expression_obj_ref"
+        },
+        {
+          "service_method_output_path": [0,"filtered_expression_matrix_ref"],
+          "target_property": "filtered_expression_matrix_ref"
+        },
+        {
+          "service_method_output_path": [0,"report_name"],
+          "target_property": "report_name"
+        },
+        {
+          "service_method_output_path": [0,"report_ref"],
+          "target_property": "report_ref"
+        },
+        {
+          "constant_value": "16",
+          "target_property": "report_window_line_height"
+        },
+        {
+          "narrative_system_variable": "workspace",
+          "target_property": "wsName"
+        }
+      ]
+    }
+  },
+  "job_id_output_field" : "docker"
+}
