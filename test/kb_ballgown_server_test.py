@@ -66,16 +66,18 @@ class kb_ballgownTest(unittest.TestCase):
         cls.stringtie = kb_stringtie(cls.callback_url, service_ver='dev')
 
         suffix = int(time.time() * 1000)
-        cls.wsName = "test_kb_ballgown_" + str(suffix)
-        cls.wsClient.create_workspace({'workspace': cls.wsName})
+        #cls.wsName = "test_kb_ballgown_" + str(suffix)
+        cls.wsName = "test_kb_ballgown_1004"
+        #cls.wsClient.create_workspace({'workspace': cls.wsName})
 
-        cls.prepare_data()
+        #cls.prepare_data()
 
     @classmethod
     def tearDownClass(cls):
-        if hasattr(cls, 'wsName'):
-            cls.wsClient.delete_workspace({'workspace': cls.wsName})
-            print('Test workspace was deleted')
+        pass
+        #if hasattr(cls, 'wsName'):
+        #    cls.wsClient.delete_workspace({'workspace': cls.wsName})
+        #    print('Test workspace was deleted')
 
     def getWsClient(self):
         return self.__class__.wsClient
@@ -137,14 +139,25 @@ class kb_ballgownTest(unittest.TestCase):
                                                'name': reads_object_name_3
                                                })['obj_ref']
 
+        reads_object_name_4 = 'test_Reads_4'
+        cls.reads_ref_4 = cls.ru.upload_reads({'fwd_file': reads_file_path,
+                                               'wsname': cls.wsName,
+                                               'sequencing_tech': 'Unknown',
+                                               'interleaved': 0,
+                                               'name': reads_object_name_4
+                                               })['obj_ref']
+
         # upload alignment object
         alignment_file_name = 'accepted_hits.bam'
         # alignment_file_name = 'Ath_WT_R1.fastq.sorted.bam'
         alignment_file_path = os.path.join(cls.scratch, alignment_file_name)
         shutil.copy(os.path.join('data', alignment_file_name), alignment_file_path)
 
-        alignment_object_name_1 = 'test_Alignment_1'
         cls.condition_1 = 'test_condition_1'
+        cls.condition_2 = 'test_condition_2'
+
+        alignment_object_name_1 = 'test_Alignment_1'
+
         cls.alignment_ref_1 = cls.rau.upload_alignment(
             {'file_path': alignment_file_path,
              'destination_ref': cls.wsName + '/' + alignment_object_name_1,
@@ -155,23 +168,33 @@ class kb_ballgownTest(unittest.TestCase):
              })['obj_ref']
 
         alignment_object_name_2 = 'test_Alignment_2'
-        cls.condition_2 = 'test_condition_2'
+
         cls.alignment_ref_2 = cls.rau.upload_alignment(
             {'file_path': alignment_file_path,
              'destination_ref': cls.wsName + '/' + alignment_object_name_2,
              'read_library_ref': cls.reads_ref_2,
-             'condition': cls.condition_2,
+             'condition': cls.condition_1,
              'library_type': 'single_end',
              'assembly_or_genome_ref': cls.genome_ref
              })['obj_ref']
 
         alignment_object_name_3 = 'test_Alignment_3'
-        cls.condition_3 = 'test_condition_3'
         cls.alignment_ref_3 = cls.rau.upload_alignment(
             {'file_path': alignment_file_path,
              'destination_ref': cls.wsName + '/' + alignment_object_name_3,
              'read_library_ref': cls.reads_ref_3,
-             'condition': cls.condition_3,
+             'condition': cls.condition_2,
+             'library_type': 'single_end',
+             'assembly_or_genome_ref': cls.genome_ref,
+             'library_type': 'single_end'
+             })['obj_ref']
+
+        alignment_object_name_4 = 'test_Alignment_4'
+        cls.alignment_ref_4 = cls.rau.upload_alignment(
+            {'file_path': alignment_file_path,
+             'destination_ref': cls.wsName + '/' + alignment_object_name_4,
+             'read_library_ref': cls.reads_ref_4,
+             'condition': cls.condition_2,
              'library_type': 'single_end',
              'assembly_or_genome_ref': cls.genome_ref,
              'library_type': 'single_end'
@@ -184,7 +207,7 @@ class kb_ballgownTest(unittest.TestCase):
             'sampleset_id': sample_set_object_name,
             'sampleset_desc': 'test sampleset object',
             'Library_type': 'SingleEnd',
-            'condition': [cls.condition_1, cls.condition_2, cls.condition_3],
+            'condition': [cls.condition_1, cls.condition_1, cls.condition_2, cls.condition_2],
             'domain': 'Unknown',
             'num_samples': 3,
             'platform': 'Unknown'}
@@ -207,16 +230,20 @@ class kb_ballgownTest(unittest.TestCase):
             'genome_id': cls.genome_ref,
             'read_sample_ids': [reads_object_name_1,
                                 reads_object_name_2,
-                                reads_object_name_3],
+                                reads_object_name_3,
+                                reads_object_name_4,],
             'mapped_rnaseq_alignments': [{reads_object_name_1: alignment_object_name_1},
                                          {reads_object_name_2: alignment_object_name_2},
-                                         {reads_object_name_3: alignment_object_name_3}],
+                                         {reads_object_name_3: alignment_object_name_3},
+                                         {reads_object_name_4: alignment_object_name_4}],
             'mapped_alignments_ids': [{reads_object_name_1: cls.alignment_ref_1},
                                       {reads_object_name_2: cls.alignment_ref_2},
-                                      {reads_object_name_3: cls.alignment_ref_3}],
+                                      {reads_object_name_3: cls.alignment_ref_3},
+                                      {reads_object_name_4: cls.alignment_ref_4}],
             'sample_alignments': [cls.alignment_ref_1,
                                   cls.alignment_ref_2,
-                                  cls.alignment_ref_3],
+                                  cls.alignment_ref_3,
+                                  cls.alignment_ref_4],
             'sampleset_id': cls.sample_set_ref}
         save_object_params = {
             'id': workspace_id,
@@ -248,17 +275,32 @@ class kb_ballgownTest(unittest.TestCase):
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
     def test_ballgown(self):
+        '''
         input_params = {
-            'expressionset_ref': self.expressionset_ref,
+            'expressionset_ref': "23748/19/1",
+            #'expressionset_ref': self.expressionset_ref,
             'diff_expression_obj_name': 'MyDiffExpression',
             'filtered_expression_matrix_name': 'MyFilteredExprMatrix',
             'workspace_name': self.getWsName(),
             "alpha_cutoff": 0.05,
             "fold_change_cutoff": 1.5,
-            'condition_labels': [self.condition_1, self.condition_2, self.condition_3],
+            'condition_labels': ['test_condition_1', 'test_condition_1', 'test_condition_2', 'test_condition_2'],
             "fold_scale_type": 'log2'
         }
+        '''
+
+        input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
+         "diff_expression_obj_name": "downsized_AT_differential_expression_object_dup",
+         "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
+         "alpha_cutoff": 0.05,
+         "fold_change_cutoff": 300,
+         "fold_scale_type": "log2+1",
+         "filtered_expression_matrix_name": "downsized_AT_filtered_expression_matrix",
+         'condition_labels': ['WT', 'WT', 'hy5', 'hy5'],
+         "expressionset_id": "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet"}
+
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
 
         print('>>>>>>>>>>>>>>>>>>got back results: '+str(result))
