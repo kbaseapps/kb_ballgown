@@ -98,6 +98,8 @@ class BallgownUtil:
         overview_content = ''
         overview_content += '<p>Generated Differential Expression Object:</p><p>{}</p>'.format(
                                                     params.get('diff_expression_obj_name'))
+        overview_content += '<p>Differential Expression Matrix Object:</p><p>{}</p>'.format(
+            params.get('filtered_expression_matrix_name'))
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
@@ -707,6 +709,9 @@ class BallgownUtil:
         returnVal = {'result_directory': ballgown_output_dir,
                      'diff_expression_obj_ref': diff_expression_obj_ref,
                      'diffExprMatrixSet_ref': diffExprMatrixSet_ref}
+
+        print ('>>>>>>>>>>>>>>>>>>diffExprMatrix_ref')
+        pprint(diffExprMatrixSet_ref)
 
         report_output = self._generate_report(params,
                                               ballgown_output_dir)
