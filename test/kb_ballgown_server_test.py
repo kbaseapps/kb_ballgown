@@ -13,6 +13,7 @@ from DataFileUtil.DataFileUtilClient import DataFileUtil
 from ReadsUtils.ReadsUtilsClient import ReadsUtils
 from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
 from kb_stringtie.kb_stringtieClient import kb_stringtie
+from SetAPI.SetAPIClient import SetAPI
 
 try:
     from ConfigParser import ConfigParser  # py2
@@ -64,6 +65,7 @@ class kb_ballgownTest(unittest.TestCase):
         cls.ru = ReadsUtils(cls.callback_url)
         cls.rau = ReadsAlignmentUtils(cls.callback_url, service_ver='dev')
         cls.stringtie = kb_stringtie(cls.callback_url, service_ver='dev')
+        cls.set_api = SetAPI(cls.callback_url)
 
         suffix = int(time.time() * 1000)
         #cls.wsName = "test_kb_ballgown_" + str(suffix)
@@ -258,7 +260,7 @@ class kb_ballgownTest(unittest.TestCase):
         cls.alignment_set_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
 
         # upload expression_set object
-        cls.expressionset_ref = cls.stringtie.run_stringtie_app(
+        cls.rnaseq_expressionset_ref = cls.stringtie.run_stringtie_app(
             {'alignment_object_ref': cls.alignment_set_ref,
              'workspace_name': cls.wsName,
              "min_read_coverage": 2.5,
@@ -274,8 +276,9 @@ class kb_ballgownTest(unittest.TestCase):
              "disable_trimming": 1})['expression_obj_ref']
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_ballgown(self):
-        '''
+
+    def test_rnaseq_ballgown(self):
+        """
         input_params = {
             'expressionset_ref': "23748/19/1",
             #'expressionset_ref': self.expressionset_ref,
@@ -287,7 +290,7 @@ class kb_ballgownTest(unittest.TestCase):
             'condition_labels': ['test_condition_1', 'test_condition_1', 'test_condition_2', 'test_condition_2'],
             "fold_scale_type": 'log2'
         }
-        '''
+        """
 
         input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
          "diff_expression_obj_name": "downsized_AT_differential_expression_object_dup",
@@ -304,3 +307,56 @@ class kb_ballgownTest(unittest.TestCase):
 
 
         print('>>>>>>>>>>>>>>>>>>got back results: '+str(result))
+    '''
+    '''
+    def test_kbasesets_ballgown(self):
+        expression_set_name = "test_expression_set"
+        expression_items = list()
+
+        expression_items.append({
+            "label": "hy5",
+            "ref": '23594/22/1'
+        })
+        expression_items.append({
+            "label": "hy5",
+            "ref": '23594/23/1'
+        })
+        expression_items.append({
+            "label": "wt",
+            "ref": '23594/24/1'
+        })
+        expression_items.append({
+            "label": "wt",
+            "ref": '23594/25/1'
+        })
+
+        expression_set = {
+            "description": "test_expressions",
+            "items": expression_items
+        }
+        expression_set_info = self.__class__.set_api.save_expression_set_v1({
+            "workspace": self.__class__.wsName,
+            "output_object_name": expression_set_name,
+            "data": expression_set
+        })
+
+        expression_set_ref = expression_set_info['set_ref']
+
+
+        input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
+         "diff_expression_obj_name": "downsized_AT_differential_expression_object_dup",
+         #"expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
+         "expressionset_ref": expression_set_ref,
+         "alpha_cutoff": 0.05,
+         "fold_change_cutoff": 300,
+         "fold_scale_type": "log2+1",
+         "filtered_expression_matrix_name": "downsized_AT_filtered_expression_matrix",
+         'condition_labels': ['WT', 'WT', 'hy5', 'hy5'],
+         "expressionset_id": "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet"}
+
+
+        result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
+
+        print('>>>>>>>>>>>>>>>>>>got back results: '+str(result))
+

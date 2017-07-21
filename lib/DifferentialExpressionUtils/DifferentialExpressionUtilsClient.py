@@ -57,21 +57,19 @@ class DifferentialExpressionUtils(object):
            reference of Differential expression data. The object ref is
            'ws_name_or_id/obj_name_or_id' where ws_name_or_id is the
            workspace name or id and obj_name_or_id is the object name or id
-           string   source_dir             -   directory with the files to be
-           uploaded string   expressionset_ref      -   expressionset object
-           reference string   tool_used              -   cufflinks, ballgown
-           or deseq string   tool_version           -   version of the tool
-           used string   diffexpr_filename      -   name of the differential
-           expression data file in source_dir, created by cuffdiff, deseq or
-           ballgown *) -> structure: parameter "destination_ref" of String,
-           parameter "source_dir" of String, parameter "expressionset_ref" of
-           String, parameter "tool_used" of String, parameter "tool_version"
-           of String, parameter "diffexpr_filename" of String, parameter
-           "tool_opts" of mapping from String to String, parameter "comments"
-           of String
+           string   diffexpr_filepath      -   file path of the differential
+           expression data file created by cuffdiff, deseq or ballgown string
+           tool_used              -   cufflinks, ballgown or deseq string  
+           tool_version           -   version of the tool used string  
+           genome_ref             -   genome object reference *) ->
+           structure: parameter "destination_ref" of String, parameter
+           "diffexpr_filepath" of String, parameter "tool_used" of String,
+           parameter "tool_version" of String, parameter "genome_ref" of
+           String, parameter "description" of String, parameter "type" of
+           String, parameter "scale" of String
         :returns: instance of type "UploadDifferentialExpressionOutput" (*   
            Output from upload differential expression    *) -> structure:
-           parameter "obj_ref" of String
+           parameter "diffExprMatrixSet_ref" of String
         """
         job_id = self._upload_differentialExpression_submit(params, context)
         async_job_check_time = self._client.async_job_check_time
