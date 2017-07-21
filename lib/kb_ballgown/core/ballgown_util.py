@@ -1,3 +1,4 @@
+import re
 import time
 import json
 import os
@@ -12,6 +13,7 @@ import math
 
 import sys
 from pprint import pformat
+from pprint import pprint
 
 from DataFileUtil.DataFileUtilClient import DataFileUtil
 from Workspace.WorkspaceClient import Workspace as Workspace
@@ -61,22 +63,6 @@ class BallgownUtil:
             else:
                 raise
 
-    def _run_command(self, command):
-        """
-        _run_command: run command and print result
-        """
-        log('Start executing command:\n{}'.format(command))
-        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-        output = pipe.communicate()[0]
-        exitCode = pipe.returncode
-
-        if (exitCode == 0):
-            log('Executed commend:\n{}\n'.format(command) +
-                'Exit Code: {}\nOutput:\n{}'.format(exitCode, output))
-        else:
-            error_msg = 'Error running commend:\n{}\n'.format(command)
-            error_msg += 'Exit Code: {}\nOutput:\n{}'.format(exitCode, output)
-            raise ValueError(error_msg)
 
     def _generate_html_report(self, result_directory, params):
         """
@@ -187,78 +173,6 @@ class BallgownUtil:
         return report_output
 
 
-    def _generate_diff_expression_data(self, result_directory, expressionset_ref,
-                                       diff_expression_obj_name, workspace_name, alpha_cutoff,
-                                       fold_change_cutoff, condition_string):
-        """
-        _generate_diff_expression_data: generate RNASeqDifferentialExpression object data
-        """
-
-        diff_expression_data = {
-                'tool_used': TOOL_NAME,
-                'tool_version': TOOL_VERSION,
-                'expressionSet_id': expressionset_ref,
-                'genome_id': self.expression_set_data.get('genome_id'),
-                'alignmentSet_id': self.expression_set_data.get('alignmentSet_id'),
-                'sampleset_id': self.expression_set_data.get('sampleset_id')
-        }
-
-
-        handle = self.dfu.file_to_shock({'file_path': result_directory,
-                                         'pack': 'zip',
-                                         'make_handle': True})['handle']
-        diff_expression_data.update({'file': handle})
-
-        condition = []
-        mapped_expr_ids = self.expression_set_data.get('mapped_expression_ids')
-        for i in mapped_expr_ids:
-            for alignment_id, expression_id in i.items():
-                expression_data = self.ws.get_objects2(
-                                                {'objects':
-                                                 [{'ref': expression_id}]})['data'][0]['data']
-                condition.append(expression_data.get('condition'))
-        diff_expression_data.update({'condition': condition})
-
-        return diff_expression_data
-
-
-
-    def _save_diff_expression(self, result_directory, params):
-        """
-        _save_diff_expression: save DifferentialExpression object to workspace
-        """
-        log('start saving RNASeqDifferentialExpression object')
-
-        workspace_name = params.get('workspace_name')
-        diff_expression_obj_name = params.get('diff_expression_obj_name')
-
-        if isinstance(workspace_name, int) or workspace_name.isdigit():
-            workspace_id = workspace_name
-        else:
-            workspace_id = self.dfu.ws_name_to_id(workspace_name)
-
-        diff_expression_data = self._generate_diff_expression_data(result_directory,
-                                                                   params.get('expressionset_ref'),
-                                                                   diff_expression_obj_name,
-                                                                   workspace_name,
-                                                                   params.get('alpha_cutoff'),
-                                                                   params.get('fold_change_cutoff'),
-                                                                   params['condition_labels'])
-
-        object_type = 'KBaseRNASeq.RNASeqDifferentialExpression'
-        save_object_params = {
-            'id': workspace_id,
-            'objects': [{
-                            'type': object_type,
-                            'data': diff_expression_data,
-                            'name': diff_expression_obj_name
-                        }]
-        }
-
-        dfu_oi = self.dfu.save_objects(save_object_params)[0]
-        diff_expression_obj_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
-
-        return diff_expression_obj_ref
 
 
 
@@ -356,42 +270,6 @@ class BallgownUtil:
             log("Unable to setup working dir {0}".format(directory))
             raise
 
-    def _save_diff_expression(self, result_directory, params):
-        """
-        _save_diff_expression: save DifferentialExpression object to workspace
-        """
-        log('start saving RNASeqDifferentialExpression object')
-
-        workspace_name = params.get('workspace_name')
-        diff_expression_obj_name = params.get('diff_expression_obj_name')
-
-        if isinstance(workspace_name, int) or workspace_name.isdigit():
-            workspace_id = workspace_name
-        else:
-            workspace_id = self.dfu.ws_name_to_id(workspace_name)
-
-        diff_expression_data = self._generate_diff_expression_data(result_directory,
-                                                                   params.get('expressionset_ref'),
-                                                                   diff_expression_obj_name,
-                                                                   workspace_name,
-                                                                   params.get('alpha_cutoff'),
-                                                                   params.get('fold_change_cutoff'),
-                                                                   params['condition_labels'])
-
-        object_type = 'KBaseRNASeq.RNASeqDifferentialExpression'
-        save_object_params = {
-            'id': workspace_id,
-            'objects': [{
-                            'type': object_type,
-                            'data': diff_expression_data,
-                            'name': diff_expression_obj_name
-                        }]
-        }
-
-        dfu_oi = self.dfu.save_objects(save_object_params)[0]
-        diff_expression_obj_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
-
-        return diff_expression_obj_ref
 
     def run_ballgown_diff_exp(self,
                               rscripts_dir,
@@ -478,157 +356,40 @@ class BallgownUtil:
         return dm
 
 
-
-    def _make_numeric(self, x, msg):
+    def _transform_expression_set_data(self, expression_set_data):
         """
-        Convert string to float.
-        If x is a float already, no huhu
-        :param msg: error message 
-        :return: 
+        The stitch to connect KBaseSets.ExpressionSet-2.0 type data to 
+        the older KBaseRNASeq.RNASeqExpressionSet-3.0 that the implementation 
+        depends on. This is done by doing a dive into the nested alignment
+        object ref and getting the required data
+        :param expression_set_data: 
+        :return: transformed expression_set_data
         """
-        try:
-            res = float(x)
-        except ValueError:
-            raise Exception("illegal non-numeric, {0}".format(msg))
-        return res
+        transform = dict()
+        # get genome id
+        expression_ref = expression_set_data['items'][0]['ref']
+        wsid, objid, ver = expression_ref.split('/')
+        expression_obj = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])
+        transform['genome_id'] = expression_obj[0]['data']['genome_id']
 
-    def _convert_NA_low(self, x):
-        if (x == 'NA' or x == 'Nan'):
-            return (-sys.maxint)
-        else:
-            return (self._make_numeric(x, "convert_NA_low"))
+        # get sampleset_id
+        #alignment_ref = expression_obj[0]['data']['mapped_rnaseq_alignment'].values()[0]
+        #wsid, objid, ver = alignment_ref.split('/')
+        #alignment_obj = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])
+        #transform['sampleset_id'] = alignment_obj[0]['data']['sampleset_id']
 
-    def filter_genes_diff_expr_matrix(self, diff_expr_matrix,
-                                      scale_type,  # "linear", "log2+1", "log10+1"
-                                      qval_cutoff,
-                                      fold_change_cutoff,
-                                      # says this is log2 but we should make it match scale_type
-                                      max_genes):
-        """
-        Returns a list of gene names from the keys of diff_expr_matrix 
-        assumed AND logic between all the tests.   The gene_names are 
-        ordered by decreasing fold-change
-        :param scale_type: 
-        :param qval_cutoff: 
-        :param fold_change_cutoff: 
-        :param max_genes: 
-        :return: 
-        """
+        # build mapped_expression_ids
+        mapped_expression_ids = list()
+        for item in expression_set_data['items']:
+            expression_ref = item['ref']
+            wsid, objid, ver = expression_ref.split('/')
+            expression_obj = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])
+            alignment_ref = expression_obj[0]['data']['mapped_rnaseq_alignment'].values()[0]
+            mapped_expression_ids.append({alignment_ref:expression_ref})
+        transform['mapped_expression_ids'] = mapped_expression_ids
 
-        # verify that qval_cutoff, fold change cutoff is None or numeric.
-        # verify scale_type is an allowed value
+        return transform
 
-        # !!!!! figure out what to do with scale conversion
-
-        if max_genes == None:
-            max_genes = sys.maxint
-
-        selected = []
-        ngenes = 0
-
-        logbase = 0  # by default this indicates linear
-        if (scale_type.lower()[0:4] == "log2"):
-            logbase = 2
-        elif (scale_type.lower()[0:5] == "log10"):
-            logbase = 10
-
-        # iterate through keys (genes) in the diff_expr_matrix, sorted by the first value of each row (fc)
-        # (decreasing)
-
-        for gene, v in sorted(diff_expr_matrix.iteritems(),
-                              key=lambda (k, v): (self._convert_NA_low(v[0]), k), reverse=True):
-
-            fc, pval, qval = diff_expr_matrix[gene]
-
-            if logbase > 0 and fc != 'NA' and fc != 'Nan':
-                fc = self._make_numeric(fc, "fc, gene {0}, about to take log{1}".format(gene, logbase))
-                try:
-                    fc = math.log(fc + 1, logbase)
-                except:
-                    raise Exception(
-                        "unable to take log{0} of fold change value {1}".format(logbase, fc))
-
-            # should NA, NaN fc, qval automatically cause exclusion?
-
-            if (qval_cutoff != None):  # user wants to apply qval_cutoff
-                if qval == 'NA' or qval == "Nan":  # bad values automatically excluded
-                    continue
-                q = self._make_numeric(qval, "qval, gene {0}".format(gene))
-                if (q < qval_cutoff):
-                    continue
-
-            if (fold_change_cutoff != None):  # user wants to apply fold_change_cutoff
-                if fc == 'NA' or fc == "Nan":  # bad values automatically excluded
-                    continue
-                f = self._make_numeric(fc, "fc, gene {0}".format(gene))
-                if (f < fold_change_cutoff):
-                    continue
-
-            ngenes = ngenes + 1
-            if ngenes > max_genes:
-                break
-
-            # if we got here, it made the cut, so add the gene to the list
-            selected.append(gene)
-
-        return selected
-
-    def _ws_get_obj_info(self, ws_id, obj_id):
-        """
-        Workspace helper function
-        ws_id is default ws_id and it will be ignored obj_id is ws reference type 
-        "ws/obj/ver"
-        :param ws_id: 
-        :param obj_id: 
-        :return: 
-        """
-        if '/' in obj_id:
-            return self.ws.get_object_info_new({"objects": [{'ref': obj_id}]})
-        else:
-            return self.ws.get_object_info_new(
-                {"objects": [{'name': obj_id, 'workspace': ws_id}]})
-
-
-    def filter_expr_matrix_object(self, emo, selected_list):
-        """
-        This weeds out all the data (rows, mappings) in given expression matrix object
-        for genes not in the given selected_list, and returns a new expression matrix object
-        The rows and values presevere the order of the input selected_list
-        :param selected_list: 
-        :return: 
-        """
-
-        fmo = {}
-        fmo["type"] = emo["type"]
-        fmo["scale"] = emo["scale"]
-        fmo["genome_ref"] = emo["genome_ref"]
-
-        fmo["data"] = {}
-        fmo["data"]["col_ids"] = emo["data"]["col_ids"]
-        fmo["data"]["row_ids"] = []
-        fmo["data"]["values"] = []
-        fmo["feature_mapping"] = {}
-
-        nrows = len(emo["data"]["row_ids"])
-        if nrows != len(emo["data"]["values"]):
-            raise Exception("filtering expression matrix:  row count mismatch in expression matrix")
-
-        # make index from gene to row
-        gindex = {}
-        for i in xrange(nrows):
-            gindex[emo["data"]["row_ids"][i]] = i
-
-        for gene in selected_list:
-            try:
-                i = gindex[gene]
-            except:
-                raise Exception(
-                    "gene {0} from differential expression not found in expression matrix")
-            fmo["data"]["row_ids"].append(emo["data"]["row_ids"][i])
-            fmo["data"]["values"].append(emo["data"]["values"][i])
-            fmo["feature_mapping"][gene] = emo["feature_mapping"][gene]
-
-        return fmo
 
     def run_ballgown_app(self, params):
         """
@@ -660,16 +421,29 @@ class BallgownUtil:
         self._validate_run_ballgown_app_params(params)
 
         expressionset_ref = params.get('expressionset_ref')
-        self.expression_set_data = self.ws.get_objects2(
-                                                {'objects':
-                                                 [{'ref': expressionset_ref}]})['data'][0]['data']
 
-        from pprint import pprint
-        print('>>>>>>>>>>expression_set_data: ')
-        pprint(self.expression_set_data)
+        expression_set_info = self.ws.get_object_info3({
+            "objects": [{"ref": expressionset_ref}]})['infos'][0]
+        expression_object_type = expression_set_info[2]
 
-        sample_dir_group_file = self.get_sample_dir_group_file(
-            self.expression_set_data, params['condition_labels'])
+        log('--->\nexpression object type: \n' +
+            '{}'.format(expression_object_type))
+
+        if re.match('KBaseRNASeq.RNASeqExpressionSet-\d.\d', expression_object_type):
+            expression_set_data = self.ws.get_objects2(
+                                                    {'objects':
+                                                     [{'ref': expressionset_ref}]})['data'][0]['data']
+
+
+        elif re.match('KBaseSets.ExpressionSet-\d.\d', expression_object_type):
+            expression_set_data = self.ws.get_objects2(
+                {'objects':
+                     [{'ref': expressionset_ref}]})['data'][0]['data']
+
+            expression_set_data = self._transform_expression_set_data(expression_set_data)
+
+        sample_dir_group_file = self.get_sample_dir_group_file(expression_set_data,
+                                                               params['condition_labels'])
 
         ballgown_output_dir = os.path.join(self.scratch, "ballgown_out")
         log("ballgown output dir is {0}".format(ballgown_output_dir))
@@ -692,13 +466,11 @@ class BallgownUtil:
         diff_expr_matrix = self.load_diff_expr_matrix(ballgown_output_dir,
                                                              output_csv)  # read file before its zipped
 
-        diff_expression_obj_ref = self._save_diff_expression(ballgown_output_dir, params)
-
-        print('>>>>>>>>>>>>>>>matrix: ' + str(diff_expression_obj_ref))
+        print('differential_expression_matrix: ' + str(diff_expr_matrix))
 
         deu_param = {
             'destination_ref': params['workspace_name'] + '/' + params['filtered_expression_matrix_name'],
-            'genome_ref': self.expression_set_data.get('genome_id'),
+            'genome_ref': expression_set_data.get('genome_id'),
             'tool_used': TOOL_NAME,
             'tool_version': TOOL_VERSION,
             'diffexpr_filepath': os.path.join(ballgown_output_dir, output_csv)
@@ -707,40 +479,11 @@ class BallgownUtil:
         diffExprMatrixSet_ref = self.deu.upload_differentialExpression(deu_param)
 
         returnVal = {'result_directory': ballgown_output_dir,
-                     'diff_expression_obj_ref': diff_expression_obj_ref,
                      'diffExprMatrixSet_ref': diffExprMatrixSet_ref}
 
-        print ('>>>>>>>>>>>>>>>>>>diffExprMatrix_ref')
-        pprint(diffExprMatrixSet_ref)
 
         report_output = self._generate_report(params,
                                               ballgown_output_dir)
         returnVal.update(report_output)
-
-
-        '''
-        TODO: This bit of code works but not sure if it belongs here. 
-        max_num_genes = sys.maxint  # default
-        if 'maximum_num_genes' in params:
-            if (params['maximum_num_genes'] != None):
-                max_num_genes = params['maximum_num_genes']
-
-        # this returns a list of gene ids passing the specified cuts, ordered by
-        # descending fold_change
-        if 'fold_change_cutoff' in params:
-            fold_change_cutoff = params['fold_change_cutoff']
-        else:
-            fold_change_cutoff = None
-
-        if len(params['condition_labels']) > 2:  # no fold change for 3 or more conditions
-            fold_change_cutoff = None
-
-        selected_gene_list = self.filter_genes_diff_expr_matrix(diff_expr_matrix,
-                                                                params['fold_scale_type'],
-                                                                params['alpha_cutoff'],
-                                                                fold_change_cutoff,
-                                                                max_num_genes)
-
-        '''
 
         return returnVal
