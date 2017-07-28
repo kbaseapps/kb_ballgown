@@ -83,14 +83,12 @@ class BallgownUtil:
         overview_content += '<p>Differential Expression Matrix Set:</p><p>{}</p>'.format(
             params.get('diff_expression_matrix_set_name'))
 
+        data_ref = self.ws.get_objects2({'objects':
+                          [{'ref': diff_expression_matrix_set_ref['diffExprMatrixSet_ref']}]})
         data_url = self.config['workspace-url']
-        data_url = re.sub('/services/ws$', '#jsonview/'+diff_expression_matrix_set_ref, data_url)
-        print('>>>>>>>>>data_url: '+data_url)
-        overview_content += '<a href="{}" target="_blank"> Click to view output object </a>'.format(
+        data_url = re.sub('/services/ws$', '#jsonview/'+data_ref['data'][0]['refs'][0], data_url)
+        overview_content += '<p><a href="{}" target="_blank"> JSON view </a></p>'.format(
             data_url)
-
-        print('>>>>>>>>>>overview_content: '+overview_content)
-
 
 
         with open(result_file_path, 'w') as result_file:
