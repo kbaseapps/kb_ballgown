@@ -81,7 +81,7 @@ class BallgownUtil:
 
         overview_content = ''
         overview_content += '<p>Differential Expression Matrix Set:</p><p>{}</p>'.format(
-            params.get('filtered_expression_matrix_name'))
+            params.get('diff_expression_matrix_set_name'))
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
