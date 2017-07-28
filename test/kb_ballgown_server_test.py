@@ -293,7 +293,7 @@ class kb_ballgownTest(unittest.TestCase):
 
         input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
          "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
-         "diff_expression_matrix_set_name": "downsized_AT_differential_expression_object_dup",
+         "diff_expression_matrix_set_suffix": "downsized_AT_differential_expression_object_dup",
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
          "fold_scale_type": "log2+1",
@@ -343,7 +343,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
         # "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
         "expressionset_ref": expression_set_ref,
-         "diff_expression_matrix_set_name": "downsized_AT_differential_expression_object_dup",
+         "diff_expression_matrix_set_suffix": "downsized_AT_differential_expression_object_dup",
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
          "fold_scale_type": "log2+1",
