@@ -30,9 +30,9 @@ parameters :
       Select the RNA-seq expression set or KBaseSets expression set associated with transcripts assembled by Cufflinks or StringTie.
   diff_expression_matrix_set_name :
     ui-name : |
-      Differential Expression Matrix Set Name
+      Differential Expression Matrix Set Suffix
     short-hint : |
-      Provide the name of the differential expression analysis output
+      Provide a suffix for the differential expression analysis output object name
   condition_labels:
       ui-name : |
           Condition Label

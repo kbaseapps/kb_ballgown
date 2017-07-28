@@ -27,11 +27,11 @@
     "field_type": "text",
     "text_options": {}
   },{
-    "id" : "diff_expression_matrix_set_name",
+    "id" : "diff_expression_matrix_set_suffix",
     "optional" : false,
     "advanced" : false,
     "allow_multiple" : false,
-    "default_values" : [ "" ],
+    "default_values" : [ "_differential_expression" ],
     "field_type" : "text",
     "text_options" : {
       "valid_ws_types" : ["KBaseSets.DifferentialExpressionMatrixSet"],
@@ -94,8 +94,8 @@
           "target_property" : "fold_change_cutoff"
         },
         {
-          "input_parameter" : "diff_expression_matrix_set_name",
-          "target_property" : "diff_expression_matrix_set_name"
+          "input_parameter" : "diff_expression_matrix_set_suffix",
+          "target_property" : "diff_expression_matrix_set_suffix"
         }],
       "output_mapping" : [
         {

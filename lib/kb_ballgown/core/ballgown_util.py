@@ -43,7 +43,7 @@ class BallgownUtil:
         log('start validating run_ballgown_app params')
 
         # check for required parameters
-        for p in ['expressionset_ref', 'diff_expression_matrix_set_name',
+        for p in ['expressionset_ref', 'diff_expression_matrix_set_suffix',
                   'condition_labels', 'workspace_name',
                   'alpha_cutoff', 'fold_change_cutoff']:
             if p not in params:
@@ -387,7 +387,7 @@ class BallgownUtil:
 
         required params:
             expressionset_ref: ExpressionSet object reference
-            diff_expression_matrix_set_name: KBaseSets.DifferetialExpressionMatrixSet name
+            diff_expression_matrix_set_suffix: suffix to KBaseSets.DifferetialExpressionMatrixSet name
             condition_labels: conditions for expression set object
             alpha_cutoff: q value cutoff
             fold_change_cutoff: fold change cutoff
@@ -418,6 +418,8 @@ class BallgownUtil:
         expression_name = expression_set_info[1]
         if re.match('.*_[Ee]xpression$', expression_name):
             params['diff_expression_matrix_set_name'] = re.sub('_[Ee]xpression$', differential_expression_suffix, expression_name)
+        if re.match('.*_[Ee]xpression_[Ss]et$', expression_name):
+            params['diff_expression_matrix_set_name'] = re.sub('_[Ee]xpression_[Ss]et$', differential_expression_suffix, expression_name)
         else:
             params['diff_expression_matrix_set_name'] = expression_name + differential_expression_suffix
 

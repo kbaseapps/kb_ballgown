@@ -30,7 +30,7 @@ module kb_ballgown {
     */
     typedef structure{
         obj_ref expressionset_ref;
-        string diff_expression_matrix_set_name;
+        string diff_expression_matrix_set_suffix;
         list<string> condition_labels;
         float alpha_cutoff;
         float fold_change_cutoff;
