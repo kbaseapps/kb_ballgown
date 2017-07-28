@@ -16,8 +16,7 @@ module kb_ballgown {
     /*
       required params:
       expressionset_ref: ExpressionSet object reference
-      diff_expression_obj_name: RNASeqDifferetialExpression object name
-      filtered_expression_matrix_name: name of output object filtered expression matrix
+      diff_expression_matrix_set_name: KBaseSets.DifferetialExpressionMatrixSet name
       condition_labels: conditions for expression set object
       alpha_cutoff: q value cutoff
       fold_change_cutoff: fold change cutoff
@@ -31,8 +30,7 @@ module kb_ballgown {
     */
     typedef structure{
         obj_ref expressionset_ref;
-        string diff_expression_obj_name;
-        string filtered_expression_matrix_name;
+        string diff_expression_matrix_set_name;
         list<string> condition_labels;
         float alpha_cutoff;
         float fold_change_cutoff;
@@ -51,8 +49,7 @@ module kb_ballgown {
     */
     typedef structure{
         string result_directory;
-        obj_ref diff_expression_obj_ref;
-        obj_ref filtered_expression_matrix_ref;
+        obj_ref diff_expression_matrix_set_ref;
         string report_name;
         string report_ref;
     }BallgownResult;

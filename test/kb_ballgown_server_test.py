@@ -282,8 +282,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             'expressionset_ref': "23748/19/1",
             #'expressionset_ref': self.expressionset_ref,
-            'diff_expression_obj_name': 'MyDiffExpression',
-            'filtered_expression_matrix_name': 'MyFilteredExprMatrix',
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
             'workspace_name': self.getWsName(),
             "alpha_cutoff": 0.05,
             "fold_change_cutoff": 1.5,
@@ -293,8 +292,8 @@ class kb_ballgownTest(unittest.TestCase):
         """
 
         input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
-         "diff_expression_obj_name": "downsized_AT_differential_expression_object_dup",
          "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
+         "diff_expression_matrix_set_name": "downsized_AT_differential_expression_object_dup",
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
          "fold_scale_type": "log2+1",
@@ -344,13 +343,12 @@ class kb_ballgownTest(unittest.TestCase):
 
 
         input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
-         "diff_expression_obj_name": "downsized_AT_differential_expression_object_dup",
-         #"expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
-         "expressionset_ref": expression_set_ref,
+        # "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
+        "expressionset_ref": expression_set_ref,
+         "diff_expression_matrix_set_name": "downsized_AT_differential_expression_object_dup",
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
          "fold_scale_type": "log2+1",
-         "filtered_expression_matrix_name": "downsized_AT_filtered_expression_matrix",
          'condition_labels': ['WT', 'WT', 'hy5', 'hy5'],
          "expressionset_id": "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet"}
 
