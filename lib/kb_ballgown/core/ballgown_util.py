@@ -169,6 +169,8 @@ class BallgownUtil:
         self.deu = DifferentialExpressionUtils(self.callback_url, service_ver='dev')
         self.ws = Workspace(self.ws_url, token=self.token)
         self.scratch = config['scratch']
+        print('>>>>>>>>>>>>>>>>>config: ')
+        pprint(config)
 
     def get_sample_dir_group_file(self, expression_set_data, condition_labels):
 
@@ -403,6 +405,14 @@ class BallgownUtil:
         expression_set_info = self.ws.get_object_info3({
             "objects": [{"ref": expressionset_ref}]})['infos'][0]
         expression_object_type = expression_set_info[2]
+
+        # set output object name
+        differential_expression_suffix = '_DifferentialExpression'
+        expression_name = expression_set_info[1]
+        if re.match('.*_[Ee]xpression$', expression_name):
+            params['diff_expression_matrix_set_name'] = re.sub('_[Ee]xpression$', differential_expression_suffix, expression_name)
+        else:
+            params['diff_expression_matrix_set_name'] = expression_name + differential_expression_suffix
 
         log('--->\nexpression object type: \n' +
             '{}'.format(expression_object_type))

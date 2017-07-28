@@ -297,9 +297,7 @@ class kb_ballgownTest(unittest.TestCase):
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
          "fold_scale_type": "log2+1",
-         "filtered_expression_matrix_name": "downsized_AT_filtered_expression_matrix",
-         'condition_labels': ['WT', 'WT', 'hy5', 'hy5'],
-         "expressionset_id": "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet"}
+         'condition_labels': ['WT', 'WT', 'hy5', 'hy5']}
 
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
@@ -349,8 +347,7 @@ class kb_ballgownTest(unittest.TestCase):
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
          "fold_scale_type": "log2+1",
-         'condition_labels': ['WT', 'WT', 'hy5', 'hy5'],
-         "expressionset_id": "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet"}
+         'condition_labels': ['WT', 'WT', 'hy5', 'hy5']}
 
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
