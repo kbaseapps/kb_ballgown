@@ -64,7 +64,7 @@ class BallgownUtil:
                 raise
 
 
-    def _generate_html_report(self, result_directory, params):
+    def _generate_html_report(self, result_directory, params, diff_expression_matrix_set_ref):
         """
         _generate_html_report: generate html summary report
         """
@@ -82,6 +82,16 @@ class BallgownUtil:
         overview_content = ''
         overview_content += '<p>Differential Expression Matrix Set:</p><p>{}</p>'.format(
             params.get('diff_expression_matrix_set_name'))
+
+        data_url = self.config['workspace-url']
+        data_url = re.sub('/services/ws$', '#jsonview/'+diff_expression_matrix_set_ref, data_url)
+        print('>>>>>>>>>data_url: '+data_url)
+        overview_content += '<a href="{}" target="_blank"> Click to view output object </a>'.format(
+            data_url)
+
+        print('>>>>>>>>>>overview_content: '+overview_content)
+
+
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
@@ -128,7 +138,7 @@ class BallgownUtil:
 
         return output_files
 
-    def _generate_report(self, params, result_directory):
+    def _generate_report(self, params, result_directory, diff_expression_matrix_set_ref):
         """
         _generate_report: generate summary report
         """
@@ -136,7 +146,7 @@ class BallgownUtil:
 
         output_files = self._generate_output_file_list(result_directory)
 
-        output_html_files = self._generate_html_report(result_directory, params)
+        output_html_files = self._generate_html_report(result_directory, params, diff_expression_matrix_set_ref)
 
         report_params = {
               'message': '',
@@ -169,8 +179,7 @@ class BallgownUtil:
         self.deu = DifferentialExpressionUtils(self.callback_url, service_ver='dev')
         self.ws = Workspace(self.ws_url, token=self.token)
         self.scratch = config['scratch']
-        print('>>>>>>>>>>>>>>>>>config: ')
-        pprint(config)
+        self.config = config
 
     def get_sample_dir_group_file(self, expression_set_data, condition_labels):
 
@@ -468,7 +477,7 @@ class BallgownUtil:
 
 
         report_output = self._generate_report(params,
-                                              ballgown_output_dir)
+                                              ballgown_output_dir, diff_expression_matrix_set_ref)
         returnVal.update(report_output)
 
         return returnVal
