@@ -222,11 +222,12 @@ class BallgownUtil:
         index = 0  # condition label index
         for ii in mapped_expr_ids:
             for alignment_id, expression_id in ii.items():
-                expression_data = self.ws.get_objects2(
+                expression_object = self.ws.get_objects2(
                                                 {'objects':
-                                                 [{'ref': expression_id}]})['data'][0]['data']
-                handle_id = expression_data.get('file').get('hid')
-                expression_name = expression_data.get('id')
+                                                 [{'ref': expression_id}]})['data'][0]
+                handle_id = expression_object['data']['file']['hid']
+                expression_name = expression_object['info'][1]
+                print('>>>>>>>>>>>>>>>>>>>>>>>>expression_name: '+expression_name)
 
                 expression_dir = os.path.join(group_file_dir, expression_name)
                 self._mkdir_p(expression_dir)
