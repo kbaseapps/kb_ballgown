@@ -205,7 +205,9 @@ class BallgownUtil:
         for group in condition_labels:
             if group_counts[group] < 2:
                 raise Exception(
-                    "condition group {0} has less than 2 members; ballgown will not run".format(group))
+                    "Condition group {0} has less than 2 members; ballgown will not run. "
+                    "Provide one condition label per Expression object in the Expression Set "
+                    "above".format(group))
 
         group_file_dir = os.path.join(self.scratch, str(uuid.uuid4()))
         self._mkdir_p(group_file_dir)
