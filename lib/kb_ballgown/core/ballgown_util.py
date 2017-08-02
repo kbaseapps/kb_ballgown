@@ -201,7 +201,9 @@ class BallgownUtil:
 
         # checks for proper ballgown execution:
         if ngroups < 2:
-            raise Exception("At least two condition groups are needed for this analysis")
+            raise Exception("At least two condition groups are needed for this analysis. "
+                            "Provide one condition label per Expression object in the Expression Set "
+                            "above")
         for group in condition_labels:
             if group_counts[group] < 2:
                 raise Exception(
