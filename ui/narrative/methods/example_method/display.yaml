@@ -37,7 +37,7 @@ parameters :
       ui-name : |
           Condition Label
       short-hint : |
-          Condition Label
+          Provide one condition label per Expression object in the given Expression Set
   alpha_cutoff :
       ui-name : |
           Alpha Cutoff
