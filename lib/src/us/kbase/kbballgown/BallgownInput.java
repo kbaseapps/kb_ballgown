@@ -17,14 +17,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * required params:
  * expressionset_ref: ExpressionSet object reference
- * diff_expression_obj_name: RNASeqDifferetialExpression object name
- * filtered_expression_matrix_name: name of output object filtered expression matrix
+ * diff_expression_matrix_set_name: KBaseSets.DifferetialExpressionMatrixSet name
  * condition_labels: conditions for expression set object
  * alpha_cutoff: q value cutoff
  * fold_change_cutoff: fold change cutoff
  * num_threads: number of threads
  * workspace_name: the name of the workspace it gets saved to
  * optional params:
+ * maximum_num_genes: used to filter genes in the differential expression matrix
  * fold_scale_type: one of ["linear", "log2+1", "log10+1"]
  * </pre>
  * 
@@ -33,23 +33,21 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "expressionset_ref",
-    "diff_expression_obj_name",
-    "filtered_expression_matrix_name",
+    "diff_expression_matrix_set_suffix",
     "condition_labels",
     "alpha_cutoff",
     "fold_change_cutoff",
     "num_threads",
     "workspace_name",
+    "maximum_num_genes",
     "fold_scale_type"
 })
 public class BallgownInput {
 
     @JsonProperty("expressionset_ref")
     private java.lang.String expressionsetRef;
-    @JsonProperty("diff_expression_obj_name")
-    private java.lang.String diffExpressionObjName;
-    @JsonProperty("filtered_expression_matrix_name")
-    private java.lang.String filteredExpressionMatrixName;
+    @JsonProperty("diff_expression_matrix_set_suffix")
+    private java.lang.String diffExpressionMatrixSetSuffix;
     @JsonProperty("condition_labels")
     private List<String> conditionLabels;
     @JsonProperty("alpha_cutoff")
@@ -60,6 +58,8 @@ public class BallgownInput {
     private Long numThreads;
     @JsonProperty("workspace_name")
     private java.lang.String workspaceName;
+    @JsonProperty("maximum_num_genes")
+    private Long maximumNumGenes;
     @JsonProperty("fold_scale_type")
     private java.lang.String foldScaleType;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
@@ -79,33 +79,18 @@ public class BallgownInput {
         return this;
     }
 
-    @JsonProperty("diff_expression_obj_name")
-    public java.lang.String getDiffExpressionObjName() {
-        return diffExpressionObjName;
+    @JsonProperty("diff_expression_matrix_set_suffix")
+    public java.lang.String getDiffExpressionMatrixSetSuffix() {
+        return diffExpressionMatrixSetSuffix;
     }
 
-    @JsonProperty("diff_expression_obj_name")
-    public void setDiffExpressionObjName(java.lang.String diffExpressionObjName) {
-        this.diffExpressionObjName = diffExpressionObjName;
+    @JsonProperty("diff_expression_matrix_set_suffix")
+    public void setDiffExpressionMatrixSetSuffix(java.lang.String diffExpressionMatrixSetSuffix) {
+        this.diffExpressionMatrixSetSuffix = diffExpressionMatrixSetSuffix;
     }
 
-    public BallgownInput withDiffExpressionObjName(java.lang.String diffExpressionObjName) {
-        this.diffExpressionObjName = diffExpressionObjName;
-        return this;
-    }
-
-    @JsonProperty("filtered_expression_matrix_name")
-    public java.lang.String getFilteredExpressionMatrixName() {
-        return filteredExpressionMatrixName;
-    }
-
-    @JsonProperty("filtered_expression_matrix_name")
-    public void setFilteredExpressionMatrixName(java.lang.String filteredExpressionMatrixName) {
-        this.filteredExpressionMatrixName = filteredExpressionMatrixName;
-    }
-
-    public BallgownInput withFilteredExpressionMatrixName(java.lang.String filteredExpressionMatrixName) {
-        this.filteredExpressionMatrixName = filteredExpressionMatrixName;
+    public BallgownInput withDiffExpressionMatrixSetSuffix(java.lang.String diffExpressionMatrixSetSuffix) {
+        this.diffExpressionMatrixSetSuffix = diffExpressionMatrixSetSuffix;
         return this;
     }
 
@@ -184,6 +169,21 @@ public class BallgownInput {
         return this;
     }
 
+    @JsonProperty("maximum_num_genes")
+    public Long getMaximumNumGenes() {
+        return maximumNumGenes;
+    }
+
+    @JsonProperty("maximum_num_genes")
+    public void setMaximumNumGenes(Long maximumNumGenes) {
+        this.maximumNumGenes = maximumNumGenes;
+    }
+
+    public BallgownInput withMaximumNumGenes(Long maximumNumGenes) {
+        this.maximumNumGenes = maximumNumGenes;
+        return this;
+    }
+
     @JsonProperty("fold_scale_type")
     public java.lang.String getFoldScaleType() {
         return foldScaleType;
@@ -211,7 +211,7 @@ public class BallgownInput {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((((("BallgownInput"+" [expressionsetRef=")+ expressionsetRef)+", diffExpressionObjName=")+ diffExpressionObjName)+", filteredExpressionMatrixName=")+ filteredExpressionMatrixName)+", conditionLabels=")+ conditionLabels)+", alphaCutoff=")+ alphaCutoff)+", foldChangeCutoff=")+ foldChangeCutoff)+", numThreads=")+ numThreads)+", workspaceName=")+ workspaceName)+", foldScaleType=")+ foldScaleType)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((("BallgownInput"+" [expressionsetRef=")+ expressionsetRef)+", diffExpressionMatrixSetSuffix=")+ diffExpressionMatrixSetSuffix)+", conditionLabels=")+ conditionLabels)+", alphaCutoff=")+ alphaCutoff)+", foldChangeCutoff=")+ foldChangeCutoff)+", numThreads=")+ numThreads)+", workspaceName=")+ workspaceName)+", maximumNumGenes=")+ maximumNumGenes)+", foldScaleType=")+ foldScaleType)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
