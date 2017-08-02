@@ -26,8 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "result_directory",
-    "diff_expression_obj_ref",
-    "filtered_expression_matrix_ref",
+    "diff_expression_matrix_set_ref",
     "report_name",
     "report_ref"
 })
@@ -35,10 +34,8 @@ public class BallgownResult {
 
     @JsonProperty("result_directory")
     private String resultDirectory;
-    @JsonProperty("diff_expression_obj_ref")
-    private String diffExpressionObjRef;
-    @JsonProperty("filtered_expression_matrix_ref")
-    private String filteredExpressionMatrixRef;
+    @JsonProperty("diff_expression_matrix_set_ref")
+    private String diffExpressionMatrixSetRef;
     @JsonProperty("report_name")
     private String reportName;
     @JsonProperty("report_ref")
@@ -60,33 +57,18 @@ public class BallgownResult {
         return this;
     }
 
-    @JsonProperty("diff_expression_obj_ref")
-    public String getDiffExpressionObjRef() {
-        return diffExpressionObjRef;
+    @JsonProperty("diff_expression_matrix_set_ref")
+    public String getDiffExpressionMatrixSetRef() {
+        return diffExpressionMatrixSetRef;
     }
 
-    @JsonProperty("diff_expression_obj_ref")
-    public void setDiffExpressionObjRef(String diffExpressionObjRef) {
-        this.diffExpressionObjRef = diffExpressionObjRef;
+    @JsonProperty("diff_expression_matrix_set_ref")
+    public void setDiffExpressionMatrixSetRef(String diffExpressionMatrixSetRef) {
+        this.diffExpressionMatrixSetRef = diffExpressionMatrixSetRef;
     }
 
-    public BallgownResult withDiffExpressionObjRef(String diffExpressionObjRef) {
-        this.diffExpressionObjRef = diffExpressionObjRef;
-        return this;
-    }
-
-    @JsonProperty("filtered_expression_matrix_ref")
-    public String getFilteredExpressionMatrixRef() {
-        return filteredExpressionMatrixRef;
-    }
-
-    @JsonProperty("filtered_expression_matrix_ref")
-    public void setFilteredExpressionMatrixRef(String filteredExpressionMatrixRef) {
-        this.filteredExpressionMatrixRef = filteredExpressionMatrixRef;
-    }
-
-    public BallgownResult withFilteredExpressionMatrixRef(String filteredExpressionMatrixRef) {
-        this.filteredExpressionMatrixRef = filteredExpressionMatrixRef;
+    public BallgownResult withDiffExpressionMatrixSetRef(String diffExpressionMatrixSetRef) {
+        this.diffExpressionMatrixSetRef = diffExpressionMatrixSetRef;
         return this;
     }
 
@@ -132,7 +114,7 @@ public class BallgownResult {
 
     @Override
     public String toString() {
-        return ((((((((((((("BallgownResult"+" [resultDirectory=")+ resultDirectory)+", diffExpressionObjRef=")+ diffExpressionObjRef)+", filteredExpressionMatrixRef=")+ filteredExpressionMatrixRef)+", reportName=")+ reportName)+", reportRef=")+ reportRef)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("BallgownResult"+" [resultDirectory=")+ resultDirectory)+", diffExpressionMatrixSetRef=")+ diffExpressionMatrixSetRef)+", reportName=")+ reportName)+", reportRef=")+ reportRef)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
