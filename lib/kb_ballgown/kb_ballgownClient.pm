@@ -124,7 +124,6 @@ $returnVal is a kb_ballgown.BallgownResult
 BallgownInput is a reference to a hash where the following keys are defined:
 	expressionset_ref has a value which is a kb_ballgown.obj_ref
 	diff_expression_matrix_set_suffix has a value which is a string
-	condition_labels has a value which is a reference to a list where each element is a string
 	alpha_cutoff has a value which is a float
 	fold_change_cutoff has a value which is a float
 	num_threads has a value which is an int
@@ -149,7 +148,6 @@ $returnVal is a kb_ballgown.BallgownResult
 BallgownInput is a reference to a hash where the following keys are defined:
 	expressionset_ref has a value which is a kb_ballgown.obj_ref
 	diff_expression_matrix_set_suffix has a value which is a string
-	condition_labels has a value which is a reference to a list where each element is a string
 	alpha_cutoff has a value which is a float
 	fold_change_cutoff has a value which is a float
 	num_threads has a value which is an int
@@ -385,7 +383,6 @@ a string
 required params:
 expressionset_ref: ExpressionSet object reference
 diff_expression_matrix_set_name: KBaseSets.DifferetialExpressionMatrixSet name
-condition_labels: conditions for expression set object
 alpha_cutoff: q value cutoff
 fold_change_cutoff: fold change cutoff
 num_threads: number of threads
@@ -404,7 +401,6 @@ fold_scale_type: one of ["linear", "log2+1", "log10+1"]
 a reference to a hash where the following keys are defined:
 expressionset_ref has a value which is a kb_ballgown.obj_ref
 diff_expression_matrix_set_suffix has a value which is a string
-condition_labels has a value which is a reference to a list where each element is a string
 alpha_cutoff has a value which is a float
 fold_change_cutoff has a value which is a float
 num_threads has a value which is an int
@@ -421,7 +417,6 @@ fold_scale_type has a value which is a string
 a reference to a hash where the following keys are defined:
 expressionset_ref has a value which is a kb_ballgown.obj_ref
 diff_expression_matrix_set_suffix has a value which is a string
-condition_labels has a value which is a reference to a list where each element is a string
 alpha_cutoff has a value which is a float
 fold_change_cutoff has a value which is a float
 num_threads has a value which is an int

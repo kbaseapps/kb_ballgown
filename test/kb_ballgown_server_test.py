@@ -286,7 +286,6 @@ class kb_ballgownTest(unittest.TestCase):
             'workspace_name': self.getWsName(),
             "alpha_cutoff": 0.05,
             "fold_change_cutoff": 1.5,
-            'condition_labels': ['test_condition_1', 'test_condition_1', 'test_condition_2', 'test_condition_2'],
             "fold_scale_type": 'log2'
         }
         """
@@ -304,8 +303,7 @@ class kb_ballgownTest(unittest.TestCase):
 
 
         print('>>>>>>>>>>>>>>>>>>got back results: '+str(result))
-    '''
-    '''
+
     def test_kbasesets_ballgown(self):
         expression_set_name = "test_expression_set"
         expression_items = list()
@@ -346,8 +344,7 @@ class kb_ballgownTest(unittest.TestCase):
          "diff_expression_matrix_set_suffix": "downsized_AT_differential_expression_object_dup",
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
-         "fold_scale_type": "log2+1",
-         'condition_labels': ['WT', 'WT', 'hy5', 'hy5']}
+         "fold_scale_type": "log2+1"}
 
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
