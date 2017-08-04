@@ -86,11 +86,11 @@ class BallgownUtil:
                           [{'ref': diff_expression_matrix_set_ref['diffExprMatrixSet_ref']}]})
         ws_url = self.config['workspace-url']
 
-        obj_url = re.sub('/services/ws$', '#jsonview/' + diff_expression_matrix_set_ref['diffExprMatrixSet_ref'], ws_url)
+        obj_url = re.sub('/services/ws(/)?$', '#jsonview/' + diff_expression_matrix_set_ref['diffExprMatrixSet_ref'], ws_url)
         overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression object </a></p>'.format(
             obj_url)
 
-        data_url = re.sub('/services/ws$', '#jsonview/' + data_ref['data'][0]['refs'][0], ws_url)
+        data_url = re.sub('/services/ws(/)?$', '#jsonview/' + data_ref['data'][0]['refs'][0], ws_url)
         overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression data </a></p>'.format(
             data_url)
 
