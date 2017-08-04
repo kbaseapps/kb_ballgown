@@ -17,7 +17,6 @@ module kb_ballgown {
       required params:
       expressionset_ref: ExpressionSet object reference
       diff_expression_matrix_set_name: KBaseSets.DifferetialExpressionMatrixSet name
-      condition_labels: conditions for expression set object
       alpha_cutoff: q value cutoff
       fold_change_cutoff: fold change cutoff
       num_threads: number of threads
@@ -31,7 +30,6 @@ module kb_ballgown {
     typedef structure{
         obj_ref expressionset_ref;
         string diff_expression_matrix_set_suffix;
-        list<string> condition_labels;
         float alpha_cutoff;
         float fold_change_cutoff;
         int num_threads;

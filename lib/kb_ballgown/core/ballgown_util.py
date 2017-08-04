@@ -44,8 +44,7 @@ class BallgownUtil:
 
         # check for required parameters
         for p in ['expressionset_ref', 'diff_expression_matrix_set_suffix',
-                  'condition_labels', 'workspace_name',
-                  'alpha_cutoff', 'fold_change_cutoff']:
+                  'workspace_name', 'alpha_cutoff', 'fold_change_cutoff']:
             if p not in params:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
@@ -201,15 +200,12 @@ class BallgownUtil:
 
         # checks for proper ballgown execution:
         if ngroups < 2:
-            raise Exception("At least two condition groups are needed for this analysis. "
-                            "Provide one condition label per Expression object in the Expression Set "
-                            "above")
+            raise Exception("At least two condition groups are needed for this analysis. ")
         for group in condition_labels:
             if group_counts[group] < 2:
                 raise Exception(
                     "Condition group {0} has less than 2 members; ballgown will not run. "
-                    "Provide one condition label per Expression object in the Expression Set "
-                    "above".format(group))
+                    "At least two condition groups are needed for this analysis. ".format(group))
 
         group_file_dir = os.path.join(self.scratch, str(uuid.uuid4()))
         self._mkdir_p(group_file_dir)
@@ -231,7 +227,6 @@ class BallgownUtil:
                                                  [{'ref': expression_id}]})['data'][0]
                 handle_id = expression_object['data']['file']['hid']
                 expression_name = expression_object['info'][1]
-                print('>>>>>>>>>>>>>>>>>>>>>>>>expression_name: '+expression_name)
 
                 expression_dir = os.path.join(group_file_dir, expression_name)
                 self._mkdir_p(expression_dir)
@@ -389,6 +384,28 @@ class BallgownUtil:
 
         return transform
 
+    def _build_condition_label_list(self, expression_set_data):
+        """
+        Extracts the condition labels from each expression in the specified expression set data
+        and builds a list of condition labels
+        :param expression_set_data: expression set data
+        :return: list of condition labels whose order resembles the expression order in 
+        the expression data
+        """
+        condition_labels = list()
+
+        mapped_expr_ids = expression_set_data.get('mapped_expression_ids')
+
+        for ii in mapped_expr_ids:
+            for alignment_id, expression_id in ii.items():
+                expression_object = self.ws.get_objects2(
+                                                {'objects':
+                                                 [{'ref': expression_id}]})['data'][0]
+                condition_labels.append(expression_object['data']['condition'])
+
+        return condition_labels
+
+
 
     def run_ballgown_app(self, params):
         """
@@ -448,6 +465,9 @@ class BallgownUtil:
                      [{'ref': expressionset_ref}]})['data'][0]['data']
 
             expression_set_data = self._transform_expression_set_data(expression_set_data)
+
+
+        params['condition_labels'] = self._build_condition_label_list(expression_set_data)
 
         sample_dir_group_file = self.get_sample_dir_group_file(expression_set_data,
                                                                params['condition_labels'])

@@ -33,11 +33,6 @@ parameters :
       Differential Expression Matrix Set Suffix
     short-hint : |
       Provide a suffix for the differential expression analysis output object name
-  condition_labels:
-      ui-name : |
-          Condition Label
-      short-hint : |
-          Provide one condition label per Expression object in the given Expression Set
   alpha_cutoff :
       ui-name : |
           Alpha Cutoff

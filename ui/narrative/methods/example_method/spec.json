@@ -19,14 +19,6 @@
       "valid_ws_types" : ["KBaseRNASeq.RNASeqExpressionSet", "KBaseSets.ExpressionSet"]
     }
   },{
-    "id": "condition_labels",
-    "optional": false,
-    "advanced": false,
-    "allow_multiple": true,
-    "default_values": [""],
-    "field_type": "text",
-    "text_options": {}
-  },{
     "id" : "diff_expression_matrix_set_suffix",
     "optional" : false,
     "advanced" : false,
@@ -80,10 +72,6 @@
           "input_parameter" : "expressionset_ref",
           "target_type_transform": "resolved-ref",
           "target_property" : "expressionset_ref"
-        },
-        {
-          "input_parameter" : "condition_labels",
-          "target_property" : "condition_labels"
         },
         {
           "input_parameter" : "alpha_cutoff",
