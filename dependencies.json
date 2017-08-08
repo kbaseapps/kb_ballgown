@@ -15,10 +15,6 @@
   "type" : "sdk",
   "version_tag" : "release"
 }, {
-  "module_name" : "kb_stringtie",
-  "type" : "sdk",
-  "version_tag" : "release"
-}, {
   "module_name" : "KBaseFeatureValues",
   "type" : "sdk",
   "version_tag" : "release"
