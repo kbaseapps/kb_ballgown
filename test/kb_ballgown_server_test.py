@@ -12,7 +12,8 @@ from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
 from DataFileUtil.DataFileUtilClient import DataFileUtil
 from ReadsUtils.ReadsUtilsClient import ReadsUtils
 from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
-from kb_stringtie.kb_stringtieClient import kb_stringtie
+from ExpressionUtils.ExpressionUtilsClient import ExpressionUtils
+from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport
 from SetAPI.SetAPIClient import SetAPI
 
 try:
@@ -32,7 +33,7 @@ class kb_ballgownTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        token = environ.get('KB_AUTH_TOKEN', None)
+        cls.token = environ.get('KB_AUTH_TOKEN', None)
         config_file = environ.get('KB_DEPLOYMENT_CONFIG', None)
         cls.cfg = {}
         config = ConfigParser()
@@ -42,11 +43,11 @@ class kb_ballgownTest(unittest.TestCase):
         # Getting username from Auth profile for token
         authServiceUrl = cls.cfg['auth-service-url']
         auth_client = _KBaseAuth(authServiceUrl)
-        user_id = auth_client.get_user(token)
+        user_id = auth_client.get_user(cls.token)
         # WARNING: don't call any logging methods on the context object,
         # it'll result in a NoneType error
         cls.ctx = MethodContext(None)
-        cls.ctx.update({'token': token,
+        cls.ctx.update({'token': cls.token,
                         'user_id': user_id,
                         'provenance': [
                             {'service': 'kb_ballgown',
@@ -54,6 +55,9 @@ class kb_ballgownTest(unittest.TestCase):
                              'method_params': []
                              }],
                         'authenticated': 1})
+        cls.hs = HandleService(url=cls.cfg['handle-service-url'],
+                               token=cls.token)
+        cls.shockURL = cls.cfg['shock-url']
         cls.wsURL = cls.cfg['workspace-url']
         cls.wsClient = workspaceService(cls.wsURL)
         cls.serviceImpl = kb_ballgown(cls.cfg)
@@ -64,34 +68,34 @@ class kb_ballgownTest(unittest.TestCase):
         cls.dfu = DataFileUtil(cls.callback_url)
         cls.ru = ReadsUtils(cls.callback_url)
         cls.rau = ReadsAlignmentUtils(cls.callback_url, service_ver='dev')
-        cls.stringtie = kb_stringtie(cls.callback_url, service_ver='dev')
+        cls.eu = ExpressionUtils(cls.callback_url, service_ver='dev')
         cls.set_api = SetAPI(cls.callback_url)
 
         suffix = int(time.time() * 1000)
-        #cls.wsName = "test_kb_ballgown_" + str(suffix)
-        cls.wsName = "test_kb_ballgown_1004"
-        #cls.wsClient.create_workspace({'workspace': cls.wsName})
+        cls.wsName = "test_kb_ballgown_" + str(suffix)
+        #cls.wsName = "test_kb_ballgown_1004"
+        cls.wsClient.create_workspace({'workspace': cls.wsName})
 
-        #cls.prepare_data()
+        cls.nodes_to_delete = []
+        cls.handles_to_delete = []
+
+        cls.prepare_data()
 
     @classmethod
     def tearDownClass(cls):
-        pass
-        #if hasattr(cls, 'wsName'):
-        #    cls.wsClient.delete_workspace({'workspace': cls.wsName})
-        #    print('Test workspace was deleted')
+        if hasattr(cls, 'wsName'):
+            cls.wsClient.delete_workspace({'workspace': cls.wsName})
+            print('Test workspace was deleted')
+
+        if hasattr(cls, 'nodes_to_delete'):
+            for node in cls.nodes_to_delete:
+                cls.delete_shock_node(node)
+        if hasattr(cls, 'handles_to_delete'):
+            cls.hs.delete_handles(cls.hs.ids_to_handles(cls.handles_to_delete))
+            print('Deleted handles ' + str(cls.handles_to_delete))
 
     def getWsClient(self):
         return self.__class__.wsClient
-
-    def getWsName(self):
-        if hasattr(self.__class__, 'wsName'):
-            return self.__class__.wsName
-        suffix = int(time.time() * 1000)
-        wsName = "test_kb_ballgown_" + str(suffix)
-        ret = self.getWsClient().create_workspace({'workspace': wsName})  # noqa
-        self.__class__.wsName = wsName
-        return wsName
 
     def getImpl(self):
         return self.__class__.serviceImpl
@@ -100,25 +104,126 @@ class kb_ballgownTest(unittest.TestCase):
         return self.__class__.ctx
 
     @classmethod
+    def delete_shock_node(cls, node_id):
+        header = {'Authorization': 'Oauth {0}'.format(cls.token)}
+        requests.delete(cls.shockURL + '/node/' + node_id, headers=header,
+                        allow_redirects=True)
+        print('Deleted shock node ' + node_id)
+
+    @classmethod
+    def make_ref(cls, objinfo):
+        return str(objinfo[6]) + '/' + str(objinfo[0]) + '/' + str(objinfo[4])
+
+    @classmethod
+    def save_ws_obj(cls, obj, objname, objtype):
+
+        return cls.wsClient.save_objects({
+            'workspace': cls.wsName,
+            'objects': [{'type': objtype,
+                         'data': obj,
+                         'name': objname
+                         }]
+        })[0]
+
+    @classmethod
+    def upload_file_to_shock(cls, file_path):
+        """
+        Use HTTP multi-part POST to save a file to a SHOCK instance.
+        """
+        header = dict()
+        header["Authorization"] = "Oauth {0}".format(cls.token)
+
+        if file_path is None:
+            raise Exception("No file given for upload to SHOCK!")
+
+        with open(os.path.abspath(file_path), 'rb') as dataFile:
+            files = {'upload': dataFile}
+            print('POSTing data')
+            response = requests.post(
+                cls.shockURL + '/node', headers=header, files=files,
+                stream=True, allow_redirects=True)
+            print('got response')
+
+        if not response.ok:
+            response.raise_for_status()
+
+        result = response.json()
+
+        if result['error']:
+            raise Exception(result['error'][0])
+        else:
+            return result["data"]
+
+    @classmethod
+    def upload_file_to_shock_and_get_handle(cls, test_file):
+        """
+        Uploads the file in test_file to shock and returns the node and a
+        handle to the node.
+        """
+        print('loading file to shock: ' + test_file)
+        node = cls.upload_file_to_shock(test_file)
+        pprint(node)
+        cls.nodes_to_delete.append(node['id'])
+
+        print('creating handle for shock id ' + node['id'])
+        handle_id = cls.hs.persist_handle({'id': node['id'],
+                                           'type': 'shock',
+                                           'url': cls.shockURL
+                                           })
+        cls.handles_to_delete.append(handle_id)
+
+        md5 = node['file']['checksum']['md5']
+        return node['id'], handle_id, md5, node['file']['size']
+
+    @classmethod
+    def upload_annotation(cls, wsobjname, file_name):
+
+        gtf_path = os.path.join(cls.scratch, file_name)
+        shutil.copy(os.path.join('data', file_name), gtf_path)
+        id, handle_id, md5, size = cls.upload_file_to_shock_and_get_handle(gtf_path)
+
+        a_handle = {
+            'hid': handle_id,
+            'file_name': file_name,
+            'id': id,
+            "type": "KBaseRNASeq.GFFAnnotation",
+            'url': cls.shockURL,
+            'type': 'shock',
+            'remote_md5': md5
+        }
+        obj = {
+            "size": size,
+            "handle": a_handle,
+            "genome_id": "test_genome_GTF_Annotation",
+            "genome_scientific_name": "scientific name"
+        }
+        res = cls.save_ws_obj(obj, wsobjname, "KBaseRNASeq.GFFAnnotation")
+        return cls.make_ref(res)
+
+    @classmethod
     def prepare_data(cls):
         # upload genome object
-        genbank_file_name = 'minimal.gbff'
+        genbank_file_name = 'at_chrom1_section.gbk'
         genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
         shutil.copy(os.path.join('data', genbank_file_name), genbank_file_path)
 
-        genome_object_name = 'test_Genome'
-        cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
+        genome_object_name = genbank_file_name
+        genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
                                                     'workspace_name': cls.wsName,
-                                                    'genome_name': genome_object_name
+                                                    'genome_name': genome_object_name,
+                                                    'generate_ids_if_needed': 1
                                                     })['genome_ref']
 
-        # upload reads object
+        # upload annotation
+        annotation_ref = cls.upload_annotation('at_chrom1_section', 'at_chrom1_section.gtf')
+
+        # upload a dummy reads object2 (used in all expression objects)
         reads_file_name = 'Sample1.fastq'
         reads_file_path = os.path.join(cls.scratch, reads_file_name)
         shutil.copy(os.path.join('data', reads_file_name), reads_file_path)
 
         reads_object_name_1 = 'test_Reads_1'
-        cls.reads_ref_1 = cls.ru.upload_reads({'fwd_file': reads_file_path,
+        dummy_reads_ref_1 = cls.ru.upload_reads({'fwd_file': reads_file_path,
                                                'wsname': cls.wsName,
                                                'sequencing_tech': 'Unknown',
                                                'interleaved': 0,
@@ -126,90 +231,154 @@ class kb_ballgownTest(unittest.TestCase):
                                                })['obj_ref']
 
         reads_object_name_2 = 'test_Reads_2'
-        cls.reads_ref_2 = cls.ru.upload_reads({'fwd_file': reads_file_path,
-                                               'wsname': cls.wsName,
-                                               'sequencing_tech': 'Unknown',
-                                               'interleaved': 0,
-                                               'name': reads_object_name_2
-                                               })['obj_ref']
+        dummy_reads_ref_2 = cls.ru.upload_reads({'fwd_file': reads_file_path,
+                                                 'wsname': cls.wsName,
+                                                 'sequencing_tech': 'Unknown',
+                                                 'interleaved': 0,
+                                                 'name': reads_object_name_2
+                                                 })['obj_ref']
 
         reads_object_name_3 = 'test_Reads_3'
-        cls.reads_ref_3 = cls.ru.upload_reads({'fwd_file': reads_file_path,
-                                               'wsname': cls.wsName,
-                                               'sequencing_tech': 'Unknown',
-                                               'interleaved': 0,
-                                               'name': reads_object_name_3
-                                               })['obj_ref']
+        dummy_reads_ref_3 = cls.ru.upload_reads({'fwd_file': reads_file_path,
+                                                 'wsname': cls.wsName,
+                                                 'sequencing_tech': 'Unknown',
+                                                 'interleaved': 0,
+                                                 'name': reads_object_name_3
+                                                 })['obj_ref']
 
         reads_object_name_4 = 'test_Reads_4'
-        cls.reads_ref_4 = cls.ru.upload_reads({'fwd_file': reads_file_path,
-                                               'wsname': cls.wsName,
-                                               'sequencing_tech': 'Unknown',
-                                               'interleaved': 0,
-                                               'name': reads_object_name_4
-                                               })['obj_ref']
+        dummy_reads_ref_4 = cls.ru.upload_reads({'fwd_file': reads_file_path,
+                                                 'wsname': cls.wsName,
+                                                 'sequencing_tech': 'Unknown',
+                                                 'interleaved': 0,
+                                                 'name': reads_object_name_4
+                                                 })['obj_ref']
 
-        # upload alignment object
+        # upload hy5_rep1 alignment
+        alignment_object_name_hy5_rep1 = 'extracted_hy5_rep1_hisat2_alignment'
         alignment_file_name = 'accepted_hits.bam'
-        # alignment_file_name = 'Ath_WT_R1.fastq.sorted.bam'
         alignment_file_path = os.path.join(cls.scratch, alignment_file_name)
-        shutil.copy(os.path.join('data', alignment_file_name), alignment_file_path)
+        shutil.copy(os.path.join('data/extracted_hy5_rep1_hisat2_alignment/',
+                                 alignment_file_name), alignment_file_path)
 
-        cls.condition_1 = 'test_condition_1'
-        cls.condition_2 = 'test_condition_2'
-
-        alignment_object_name_1 = 'test_Alignment_1'
-
-        cls.alignment_ref_1 = cls.rau.upload_alignment(
+        alignment_ref_hy5_rep1 = cls.rau.upload_alignment(
             {'file_path': alignment_file_path,
-             'destination_ref': cls.wsName + '/' + alignment_object_name_1,
-             'read_library_ref': cls.reads_ref_1,
-             'condition': cls.condition_1,
+             'destination_ref': cls.wsName + '/' + alignment_object_name_hy5_rep1,
+             'read_library_ref': dummy_reads_ref_1,
+             'condition': 'hy5',
              'library_type': 'single_end',
-             'assembly_or_genome_ref': cls.genome_ref
+             'assembly_or_genome_ref': genome_ref
              })['obj_ref']
 
-        alignment_object_name_2 = 'test_Alignment_2'
 
-        cls.alignment_ref_2 = cls.rau.upload_alignment(
+        # upload hy5_rep1 expression
+        source_dir = 'data/extracted_hy5_rep1_hisat2_stringtie_expression'
+        expression_name_hy5_rep1 = source_dir
+        copy_to_dir = os.path.join(cls.scratch, source_dir+str(int(time.time() * 1000)))
+        shutil.copytree(source_dir, copy_to_dir)
+
+        expression_params_hy5_rep1 = {
+                  'destination_ref': cls.wsName +'/extracted_hy5_rep1_hisat2_stringtie_expression',
+                  'source_dir': copy_to_dir,
+                  'alignment_ref': alignment_ref_hy5_rep1,
+                  'genome_ref': genome_ref }
+        expression_ref_hy5_rep1 = cls.eu.upload_expression(expression_params_hy5_rep1)
+
+        # upload hy5_rep2 alignment
+        alignment_object_name_hy5_rep2 = 'extracted_hy5_rep2_hisat2_alignment'
+        alignment_file_name = 'accepted_hits.bam'
+        alignment_file_path = os.path.join(cls.scratch, alignment_file_name)
+        shutil.copy(os.path.join('data/extracted_hy5_rep2_hisat2_alignment/',
+                                 alignment_file_name), alignment_file_path)
+
+        alignment_ref_hy5_rep2 = cls.rau.upload_alignment(
             {'file_path': alignment_file_path,
-             'destination_ref': cls.wsName + '/' + alignment_object_name_2,
-             'read_library_ref': cls.reads_ref_2,
-             'condition': cls.condition_1,
+             'destination_ref': cls.wsName + '/' + alignment_object_name_hy5_rep2,
+             'read_library_ref': dummy_reads_ref_2,
+             'condition': 'hy5',
              'library_type': 'single_end',
-             'assembly_or_genome_ref': cls.genome_ref
+             'assembly_or_genome_ref': genome_ref
              })['obj_ref']
 
-        alignment_object_name_3 = 'test_Alignment_3'
-        cls.alignment_ref_3 = cls.rau.upload_alignment(
+        # upload hy5_rep2 expression
+        source_dir = 'data/extracted_hy5_rep2_hisat2_stringtie_expression'
+        expression_name_hy5_rep2 = source_dir
+        copy_to_dir = os.path.join(cls.scratch, source_dir + str(int(time.time() * 1000)))
+        shutil.copytree(source_dir, copy_to_dir)
+
+        expression_params_hy5_rep2 = {
+            'destination_ref': cls.wsName + '/extracted_hy5_rep2_hisat2_stringtie_expression',
+            'source_dir': copy_to_dir,
+            'alignment_ref': alignment_ref_hy5_rep2,
+            'genome_ref': genome_ref}
+        expression_ref_hy5_rep2 = cls.eu.upload_expression(expression_params_hy5_rep2)
+
+        # upload WT_rep1 alignment
+        alignment_object_name_WT_rep1 = 'extracted_WT_rep1_hisat2_alignment'
+        alignment_file_name = 'accepted_hits.bam'
+        alignment_file_path = os.path.join(cls.scratch, alignment_file_name)
+        shutil.copy(os.path.join('data/extracted_WT_rep1_hisat2_alignment/',
+                                 alignment_file_name), alignment_file_path)
+
+        alignment_ref_WT_rep1 = cls.rau.upload_alignment(
             {'file_path': alignment_file_path,
-             'destination_ref': cls.wsName + '/' + alignment_object_name_3,
-             'read_library_ref': cls.reads_ref_3,
-             'condition': cls.condition_2,
+             'destination_ref': cls.wsName + '/' + alignment_object_name_WT_rep1,
+             'read_library_ref': dummy_reads_ref_3,
+             'condition': 'WT',
              'library_type': 'single_end',
-             'assembly_or_genome_ref': cls.genome_ref,
-             'library_type': 'single_end'
+             'assembly_or_genome_ref': genome_ref
              })['obj_ref']
 
-        alignment_object_name_4 = 'test_Alignment_4'
-        cls.alignment_ref_4 = cls.rau.upload_alignment(
+        # upload WT_rep1 expression
+        source_dir = 'data/extracted_WT_rep1_hisat2_stringtie_expression'
+        expression_name_WT_rep1 = source_dir
+        copy_to_dir = os.path.join(cls.scratch, source_dir+str(int(time.time() * 1000)))
+        shutil.copytree(source_dir, copy_to_dir)
+
+        expression_params_WT_rep1 = {
+            'destination_ref': cls.wsName + '/extracted_WT_rep1_hisat2_stringtie_expression',
+            'source_dir': copy_to_dir,
+            'alignment_ref': alignment_ref_WT_rep1,
+            'genome_ref': genome_ref}
+        expression_ref_WT_rep1 = cls.eu.upload_expression(expression_params_WT_rep1)
+
+        # upload WT_rep2 alignment
+        alignment_object_name_WT_rep2 = 'extracted_WT_rep2_hisat2_alignment'
+        alignment_file_name = 'accepted_hits.bam'
+        alignment_file_path = os.path.join(cls.scratch, alignment_file_name)
+        shutil.copy(os.path.join('data/extracted_WT_rep2_hisat2_alignment/',
+                                 alignment_file_name), alignment_file_path)
+
+        alignment_ref_WT_rep2 = cls.rau.upload_alignment(
             {'file_path': alignment_file_path,
-             'destination_ref': cls.wsName + '/' + alignment_object_name_4,
-             'read_library_ref': cls.reads_ref_4,
-             'condition': cls.condition_2,
+             'destination_ref': cls.wsName + '/' + alignment_object_name_WT_rep2,
+             'read_library_ref': dummy_reads_ref_4,
+             'condition': 'WT',
              'library_type': 'single_end',
-             'assembly_or_genome_ref': cls.genome_ref,
-             'library_type': 'single_end'
+             'assembly_or_genome_ref': genome_ref
              })['obj_ref']
 
-        # upload sample_set object
+        # upload WT_rep1 expression
+        source_dir = 'data/extracted_WT_rep2_hisat2_stringtie_expression'
+        expression_name_WT_rep2 = source_dir
+        copy_to_dir = os.path.join(cls.scratch, source_dir + str(int(time.time() * 1000)))
+        shutil.copytree(source_dir, copy_to_dir)
+
+        expression_params_WT_rep2 = {
+            'destination_ref': cls.wsName + '/extracted_WT_rep2_hisat2_stringtie_expression',
+            'source_dir': copy_to_dir,
+            'alignment_ref': alignment_ref_WT_rep2,
+            'genome_ref': genome_ref}
+        expression_ref_WT_rep2 = cls.eu.upload_expression(expression_params_WT_rep2)
+
+        # upload dummy sample_set object
         workspace_id = cls.dfu.ws_name_to_id(cls.wsName)
         sample_set_object_name = 'test_Sample_Set'
         sample_set_data = {
             'sampleset_id': sample_set_object_name,
             'sampleset_desc': 'test sampleset object',
             'Library_type': 'SingleEnd',
-            'condition': [cls.condition_1, cls.condition_1, cls.condition_2, cls.condition_2],
+            'condition': ['hy5', 'hy5', 'WT', 'WT'],
             'domain': 'Unknown',
             'num_samples': 3,
             'platform': 'Unknown'}
@@ -221,32 +390,29 @@ class kb_ballgownTest(unittest.TestCase):
                 'name': sample_set_object_name
             }]
         }
-
         dfu_oi = cls.dfu.save_objects(save_object_params)[0]
-        cls.sample_set_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
+        sample_set_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
 
         # upload alignment_set object
         object_type = 'KBaseRNASeq.RNASeqAlignmentSet'
         alignment_set_object_name = 'test_Alignment_Set'
         alignment_set_data = {
-            'genome_id': cls.genome_ref,
-            'read_sample_ids': [reads_object_name_1,
-                                reads_object_name_2,
-                                reads_object_name_3,
-                                reads_object_name_4,],
-            'mapped_rnaseq_alignments': [{reads_object_name_1: alignment_object_name_1},
-                                         {reads_object_name_2: alignment_object_name_2},
-                                         {reads_object_name_3: alignment_object_name_3},
-                                         {reads_object_name_4: alignment_object_name_4}],
-            'mapped_alignments_ids': [{reads_object_name_1: cls.alignment_ref_1},
-                                      {reads_object_name_2: cls.alignment_ref_2},
-                                      {reads_object_name_3: cls.alignment_ref_3},
-                                      {reads_object_name_4: cls.alignment_ref_4}],
-            'sample_alignments': [cls.alignment_ref_1,
-                                  cls.alignment_ref_2,
-                                  cls.alignment_ref_3,
-                                  cls.alignment_ref_4],
-            'sampleset_id': cls.sample_set_ref}
+            'genome_id': genome_ref,
+            'read_sample_ids': [dummy_reads_ref_1,
+                                dummy_reads_ref_2],
+            'mapped_rnaseq_alignments': [{reads_object_name_1: alignment_object_name_hy5_rep1},
+                                         {reads_object_name_2: alignment_object_name_hy5_rep2},
+                                         {reads_object_name_3: alignment_object_name_WT_rep1},
+                                         {reads_object_name_4: alignment_object_name_WT_rep2}],
+            'mapped_alignments_ids': [{reads_object_name_1: alignment_ref_hy5_rep1},
+                                      {reads_object_name_2: alignment_ref_hy5_rep2},
+                                      {reads_object_name_3: alignment_ref_WT_rep1},
+                                      {reads_object_name_3: alignment_ref_WT_rep2}],
+            'sample_alignments': [alignment_ref_hy5_rep1,
+                                  alignment_ref_hy5_rep2,
+                                  alignment_ref_WT_rep1,
+                                  alignment_ref_WT_rep2],
+            'sampleset_id': sample_set_ref}
         save_object_params = {
             'id': workspace_id,
             'objects': [{
@@ -257,91 +423,129 @@ class kb_ballgownTest(unittest.TestCase):
         }
 
         dfu_oi = cls.dfu.save_objects(save_object_params)[0]
-        cls.alignment_set_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
+        alignment_set_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
 
-        # upload expression_set object
-        cls.rnaseq_expressionset_ref = cls.stringtie.run_stringtie_app(
-            {'alignment_object_ref': cls.alignment_set_ref,
-             'workspace_name': cls.wsName,
-             "min_read_coverage": 2.5,
-             "junction_base": 10,
-             "num_threads": 3,
-             "min_isoform_abundance": 0.1,
-             "min_length": 200,
-             "skip_reads_with_no_ref": 1,
-             "merge": 0,
-             "junction_coverage": 1,
-             "ballgown_mode": 1,
-             "min_locus_gap_sep_value": 50,
-             "disable_trimming": 1})['expression_obj_ref']
-
-    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-
-    def test_rnaseq_ballgown(self):
-        """
-        input_params = {
-            'expressionset_ref': "23748/19/1",
-            #'expressionset_ref': self.expressionset_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            'workspace_name': self.getWsName(),
-            "alpha_cutoff": 0.05,
-            "fold_change_cutoff": 1.5,
-            "fold_scale_type": 'log2'
+        # upload RNASeq.ExpressionSet object
+        expression_set_data = {
+            "alignmentSet_id": alignment_set_ref,
+            "genome_id": genome_ref,
+            "id": "test_expression_set",
+            "mapped_expression_ids": [
+                {
+                    alignment_ref_hy5_rep1: expression_ref_hy5_rep1['obj_ref']
+                },
+                {
+                    alignment_ref_hy5_rep2: expression_ref_hy5_rep2['obj_ref']
+                },
+                {
+                    alignment_ref_WT_rep1: expression_ref_WT_rep1['obj_ref']
+                },
+                {
+                    alignment_ref_WT_rep2: expression_ref_WT_rep2['obj_ref']
+                }
+            ],
+            "mapped_expression_objects": [
+                {
+                    alignment_object_name_hy5_rep1: expression_name_hy5_rep1
+                },
+                {
+                    alignment_object_name_hy5_rep2: expression_name_hy5_rep2
+                },
+                {
+                    alignment_object_name_WT_rep1: expression_name_WT_rep1
+                },
+                {
+                    alignment_object_name_WT_rep2: expression_name_WT_rep2
+                }
+            ],
+            "sample_expression_ids": [
+                expression_ref_hy5_rep1['obj_ref'],
+                expression_ref_hy5_rep2['obj_ref'],
+                expression_ref_WT_rep1['obj_ref'],
+                expression_ref_WT_rep2['obj_ref']
+            ],
+            "sampleset_id": sample_set_ref,
+            "tool_used": "StringTie",
+            "tool_version": "1.3.3b"
         }
-        """
 
-        input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
-         "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
-         "diff_expression_matrix_set_suffix": "downsized_AT_differential_expression_object_dup",
-         "alpha_cutoff": 0.05,
-         "fold_change_cutoff": 300,
-         "fold_scale_type": "log2+1",
-         'condition_labels': ['WT', 'WT', 'hy5', 'hy5']}
+        object_type = 'KBaseRNASeq.RNASeqExpressionSet'
+        save_object_params = {
+            'id': workspace_id,
+            'objects': [{
+                'type': object_type,
+                'data': expression_set_data,
+                'name': 'test_expression_set'
+            }]
+        }
 
+        dfu_oi = cls.dfu.save_objects(save_object_params)[0]
+        cls.rnaseq_expression_set_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
 
-        result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+        print('RNASeqExpressionSet: ')
+        pprint(cls.rnaseq_expression_set_ref)
 
-
-        print('>>>>>>>>>>>>>>>>>>got back results: '+str(result))
-
-    def test_kbasesets_ballgown(self):
-        expression_set_name = "test_expression_set"
+        # upload KbaseSets.ExpressionSet object
+        kbaseseets_expression_set_name = "test_expression_set"
         expression_items = list()
 
         expression_items.append({
             "label": "hy5",
-            "ref": '23594/22/1'
+            "ref": expression_ref_hy5_rep1['obj_ref']
         })
         expression_items.append({
             "label": "hy5",
-            "ref": '23594/23/1'
+            "ref": expression_ref_hy5_rep2['obj_ref']
         })
         expression_items.append({
-            "label": "wt",
-            "ref": '23594/24/1'
+            "label": "WT",
+            "ref": expression_ref_WT_rep1['obj_ref']
         })
         expression_items.append({
-            "label": "wt",
-            "ref": '23594/25/1'
+            "label": "WT",
+            "ref": expression_ref_WT_rep2['obj_ref']
         })
 
-        expression_set = {
+        kbasesets_expression_set = {
             "description": "test_expressions",
             "items": expression_items
         }
-        expression_set_info = self.__class__.set_api.save_expression_set_v1({
-            "workspace": self.__class__.wsName,
-            "output_object_name": expression_set_name,
-            "data": expression_set
+        expression_set_info = cls.set_api.save_expression_set_v1({
+            "workspace": cls.wsName,
+            "output_object_name": kbaseseets_expression_set_name,
+            "data": kbasesets_expression_set
         })
 
-        expression_set_ref = expression_set_info['set_ref']
+        cls.kbasesets_expression_set_ref = expression_set_info['set_ref']
 
+    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
+
+    def test_rnaseq_ballgown(self):
+
+        input_params = {
+            #'expressionset_ref': "23748/19/1",
+            'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
+            "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
+            'workspace_name': self.wsName,
+            "alpha_cutoff": 0.05,
+            "fold_change_cutoff": 1.5,
+            "fold_scale_type": 'log2'
+        }
+
+        result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
+        self.assertEqual(4, len(result))
+        print('Results: '+str(result))
+
+
+
+    def test_kbasesets_ballgown(self):
 
         input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
         # "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
-        "expressionset_ref": expression_set_ref,
-         "diff_expression_matrix_set_suffix": "downsized_AT_differential_expression_object_dup",
+        "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+         "diff_expression_matrix_set_suffix": "downsized_KBaseSets_AT_differential_expression_object",
          "alpha_cutoff": 0.05,
          "fold_change_cutoff": 300,
          "fold_scale_type": "log2+1"}
@@ -349,6 +553,6 @@ class kb_ballgownTest(unittest.TestCase):
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
 
-
-        print('>>>>>>>>>>>>>>>>>>got back results: '+str(result))
+        self.assertEqual(4, len(result))
+        print('Results: ' + str(result))
 
