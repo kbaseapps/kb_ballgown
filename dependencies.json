@@ -7,11 +7,11 @@
   "type" : "sdk",
   "version_tag" : "release"
 }, {
-  "module_name" : "GenomeFileUtil",
+  "module_name" : "ExpressionUtils",
   "type" : "sdk",
   "version_tag" : "release"
 }, {
-  "module_name" : "kb_stringtie",
+  "module_name" : "GenomeFileUtil",
   "type" : "sdk",
   "version_tag" : "release"
 }, {
