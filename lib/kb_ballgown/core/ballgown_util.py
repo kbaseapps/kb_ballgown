@@ -285,11 +285,13 @@ class BallgownUtil:
             i2t_file = open(os.path.join(expr_dir, 'i2t.ctab'), 'r')
             if len(i2t_file.readlines()) <= 1:  # only header line exists
                 raise Exception("No intron measurements found! Input expressions are possibly "
-                                "from a prokaryote. Ballgown functions only on eukaryotic data.")
+                                "from a prokaryote. Ballgown functions only on eukaryotic data."
+                                " Consider using DeSeq2 or CuffDiff instead of BallGown.")
             idata_file = open(os.path.join(expr_dir, 'i_data.ctab'), 'r')
             if len(idata_file.readlines()) <= 1: # only header line exists
                 raise Exception("No intron measurements found! Input expressions are possibly "
-                                "from a prokaryote. Ballgown functions only on eukaryotic data.")
+                                "from a prokaryote. Ballgown functions only on eukaryotic data."
+                                " Consider using DeSeq2 or CuffDiff instead of BallGown")
 
 
     def run_ballgown_diff_exp(self,
