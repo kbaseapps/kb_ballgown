@@ -48,6 +48,10 @@ class BallgownUtil:
             if p not in params:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
+        # check if domain in sampleset object is Eukaryote
+        expressionset_ref = params['expressionset_ref']
+
+
     def _mkdir_p(self, path):
         """
         _mkdir_p: make directory for given path
@@ -266,6 +270,27 @@ class BallgownUtil:
             log("Unable to setup working dir {0}".format(directory))
             raise
 
+    def _check_intron_measurements(self, sample_dir_group_table_file):
+        """
+        Check if intron measurements files are non-empty
+        :param sample_dir_group_table_file: 
+        :return: 
+        """
+        log('checking for intron level measurements... ')
+        file = open(sample_dir_group_table_file, 'r')
+        textFileLines = file.readlines()
+        for line in textFileLines:
+            expr_dir = line.split()[0]
+            log(expr_dir)
+            i2t_file = open(os.path.join(expr_dir, 'i2t.ctab'), 'r')
+            if len(i2t_file.readlines()) <= 1:  # only header line exists
+                raise Exception("No intron measurements found! Input expressions are possibly "
+                                "from a prokaryote. Ballgown functions only on eukaryotic data.")
+            idata_file = open(os.path.join(expr_dir, 'i_data.ctab'), 'r')
+            if len(idata_file.readlines()) <= 1: # only header line exists
+                raise Exception("No intron measurements found! Input expressions are possibly "
+                                "from a prokaryote. Ballgown functions only on eukaryotic data.")
+
 
     def run_ballgown_diff_exp(self,
                               rscripts_dir,
@@ -291,6 +316,9 @@ class BallgownUtil:
         :param volcano_plot_file: 
         :return: 
         """
+        # check if intron-level expression measurements are present
+        self._check_intron_measurements(sample_dir_group_table_file)
+
         rcmd_list = ['Rscript', os.path.join(rscripts_dir, 'ballgown_fpkmgenematrix.R'),
                      '--sample_dir_group_table', sample_dir_group_table_file,
                      '--output_dir', ballgown_output_dir,
