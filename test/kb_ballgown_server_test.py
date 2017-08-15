@@ -15,6 +15,8 @@ from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
 from ExpressionUtils.ExpressionUtilsClient import ExpressionUtils
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport
 from SetAPI.SetAPIClient import SetAPI
+from kb_ballgown.core.ballgown_util import BallgownUtil
+from nose.tools import raises
 
 try:
     from ConfigParser import ConfigParser  # py2
@@ -379,7 +381,7 @@ class kb_ballgownTest(unittest.TestCase):
             'sampleset_desc': 'test sampleset object',
             'Library_type': 'SingleEnd',
             'condition': ['hy5', 'hy5', 'WT', 'WT'],
-            'domain': 'Unknown',
+            'domain': 'Eukaryotes',
             'num_samples': 3,
             'platform': 'Unknown'}
         save_object_params = {
@@ -539,7 +541,6 @@ class kb_ballgownTest(unittest.TestCase):
         print('Results: '+str(result))
 
 
-
     def test_kbasesets_ballgown(self):
 
         input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
@@ -555,4 +556,15 @@ class kb_ballgownTest(unittest.TestCase):
 
         self.assertEqual(4, len(result))
         print('Results: ' + str(result))
+
+
+    @raises(Exception)
+    def test_prokaryote_empty_intron_measurement_error(self):
+        """
+        Ballgown will fail if intron level measurement comes up empty. So catch
+        this case and report as error.
+        :return: 
+        """
+        bg_util = BallgownUtil(self.__class__.cfg)
+        bg_util._check_intron_measurements('data/prokaryote/sample_dir_group_file')
 
