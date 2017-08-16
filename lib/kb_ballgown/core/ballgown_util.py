@@ -95,8 +95,12 @@ class BallgownUtil:
             obj_url)
 
         data_url = re.sub('/services/ws(/)?$', '#jsonview/' + data_ref['data'][0]['refs'][0], ws_url)
+        # need to add in the narrative path element for prod
+        if data_url.startswith('https://kbase.us'):
+            data_url = re.sub('kbase.us', 'narrative.kbase.us', data_url)
         overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression data </a></p>'.format(
             data_url)
+
 
 
         with open(result_file_path, 'w') as result_file:
