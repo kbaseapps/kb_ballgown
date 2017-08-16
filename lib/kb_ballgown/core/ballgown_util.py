@@ -91,6 +91,9 @@ class BallgownUtil:
         ws_url = self.config['workspace-url']
 
         obj_url = re.sub('/services/ws(/)?$', '#jsonview/' + diff_expression_matrix_set_ref['diffExprMatrixSet_ref'], ws_url)
+        # need to add in the narrative path element for prod
+        if obj_url.startswith('https://kbase.us'):
+            obj_url = re.sub('kbase.us', 'narrative.kbase.us', obj_url)
         overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression object </a></p>'.format(
             obj_url)
 
