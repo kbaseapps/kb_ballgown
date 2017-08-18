@@ -81,7 +81,10 @@ class BallgownUtil:
 
         shutil.copy2(os.path.join(result_directory, 'ballgown_diffexp.tsv'),
                      os.path.join(output_directory, 'ballgown_diffexp.tsv'))
-        shutil.copy2(os.path.join(result_directory, 'volcano_plot.png'),
+
+        # volcano_plot exists only if there are two condition groups
+        if os.path.exists(os.path.join(result_directory, 'volcano_plot.png')):
+            shutil.copy2(os.path.join(result_directory, 'volcano_plot.png'),
                      os.path.join(output_directory, 'volcano_plot.png'))
 
         overview_content = ''
