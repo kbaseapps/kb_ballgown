@@ -81,6 +81,8 @@ class BallgownUtil:
 
         shutil.copy2(os.path.join(result_directory, 'ballgown_diffexp.tsv'),
                      os.path.join(output_directory, 'ballgown_diffexp.tsv'))
+        shutil.copy2(os.path.join(result_directory, 'volcano_plot.png'),
+                     os.path.join(output_directory, 'volcano_plot.png'))
 
         overview_content = ''
         overview_content += '<p>Differential Expression Matrix Set:</p><p>{}</p>'.format(
@@ -305,7 +307,8 @@ class BallgownUtil:
                               rscripts_dir,
                               sample_dir_group_table_file,
                               ballgown_output_dir,
-                              output_csv
+                              output_csv,
+                              volcano_plot_file
                               ):
         """ Make R call to execute the system
         
@@ -331,7 +334,8 @@ class BallgownUtil:
         rcmd_list = ['Rscript', os.path.join(rscripts_dir, 'ballgown_fpkmgenematrix.R'),
                      '--sample_dir_group_table', sample_dir_group_table_file,
                      '--output_dir', ballgown_output_dir,
-                     '--output_csvfile', output_csv
+                     '--output_csvfile', output_csv,
+                     '--volcano_plot_file', volcano_plot_file
                      ]
         rcmd_str = " ".join(str(x) for x in rcmd_list)
         log("rcmd_string is {0}".format(rcmd_str))
@@ -517,11 +521,13 @@ class BallgownUtil:
         rscripts_dir = '/kb/module/rscripts'
 
         output_csv = "ballgown_diffexp.tsv"
+        volcano_plot_file = "volcano_plot.png"
 
         self.run_ballgown_diff_exp(rscripts_dir,
                                    sample_dir_group_file,
                                    ballgown_output_dir,
-                                   output_csv)
+                                   output_csv,
+                                   volcano_plot_file)
 
         log("back from run_ballgown_diff_exp, about to load diff exp matrix file")
         diff_expr_matrix = self.load_diff_expr_matrix(ballgown_output_dir,
