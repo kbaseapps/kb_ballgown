@@ -103,12 +103,18 @@ class BallgownUtil:
         overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression object </a></p>'.format(
             obj_url)
 
-        data_url = re.sub('/services/ws(/)?$', '#jsonview/' + data_ref['data'][0]['refs'][0], ws_url)
-        # need to add in the narrative path element for prod
-        if data_url.startswith('https://kbase.us'):
-            data_url = re.sub('kbase.us', 'narrative.kbase.us', data_url)
-        overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression data </a></p>'.format(
-            data_url)
+        refs = data_ref['data'][0]['refs']
+        items = data_ref['data'][0]['data']['items']
+
+        for ii in range(len(refs)):
+            label = items[ii]['label']
+            label = label.replace(', ', '/')
+            data_url = re.sub('/services/ws(/)?$', '#jsonview/' + data_ref['data'][0]['refs'][ii], ws_url)
+            # need to add in the narrative path element for prod
+            if data_url.startswith('https://kbase.us'):
+                data_url = re.sub('kbase.us', 'narrative.kbase.us', data_url)
+            overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression data for condition group "{}"</a></p>'.format(
+                data_url, label)
 
 
 
