@@ -1,3 +1,4 @@
+import glob
 import re
 import time
 import json
@@ -22,6 +23,7 @@ from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
 from KBaseFeatureValues.KBaseFeatureValuesClient import KBaseFeatureValues
 from DifferentialExpressionUtils.DifferentialExpressionUtilsClient import DifferentialExpressionUtils
 from os.path import isfile, join
+from kb_ballgown.core.multi_group import MultiGroup
 
 
 def log(message, prefix_newline=False):
@@ -79,13 +81,12 @@ class BallgownUtil:
         self._mkdir_p(output_directory)
         result_file_path = os.path.join(output_directory, 'report.html')
 
-        shutil.copy2(os.path.join(result_directory, 'ballgown_diffexp.tsv'),
-                     os.path.join(output_directory, 'ballgown_diffexp.tsv'))
+        for file in glob.glob(os.path.join(result_directory, '*.tsv')):
+            shutil.copy(file, output_directory)
 
         # volcano_plot exists only if there are two condition groups
-        if os.path.exists(os.path.join(result_directory, 'volcano_plot.png')):
-            shutil.copy2(os.path.join(result_directory, 'volcano_plot.png'),
-                     os.path.join(output_directory, 'volcano_plot.png'))
+        for file in glob.glob(os.path.join(result_directory, '*.png')):
+            shutil.copy(file, output_directory)
 
         overview_content = ''
         overview_content += '<p>Differential Expression Matrix Set:</p><p>{}</p>'.format(
@@ -199,7 +200,7 @@ class BallgownUtil:
         self.scratch = config['scratch']
         self.config = config
 
-    def get_sample_dir_group_file(self, expression_set_data, condition_labels):
+    def get_sample_dir_group_file(self, mapped_expression_ids, condition_labels):
 
         ngroups = 0
         group_name_indices = {}
@@ -227,16 +228,15 @@ class BallgownUtil:
         self._mkdir_p(group_file_dir)
 
         try:
-            sgf_name = os.path.join(group_file_dir,'sample_dir_group_file')
+            sgf_name = os.path.join(group_file_dir,'sample_dir_group_file_'+condition_labels[0]+'_'+
+                                    condition_labels[1])
             sgf = open( sgf_name, "w" )
         except Exception:
             raise Exception( "Can't open file {0} for writing {1}".format( sgf_name, traceback.format_exc() ) )
 
 
-        mapped_expr_ids = expression_set_data.get('mapped_expression_ids')
-
         index = 0  # condition label index
-        for ii in mapped_expr_ids:
+        for ii in mapped_expression_ids:
             for alignment_id, expression_id in ii.items():
                 expression_object = self.ws.get_objects2(
                                                 {'objects':
@@ -428,7 +428,7 @@ class BallgownUtil:
 
         return transform
 
-    def _build_condition_label_list(self, expression_set_data):
+    def _build_condition_label_list(self, mapped_expression_ids):
         """
         Extracts the condition labels from each expression in the specified expression set data
         and builds a list of condition labels
@@ -438,9 +438,7 @@ class BallgownUtil:
         """
         condition_labels = list()
 
-        mapped_expr_ids = expression_set_data.get('mapped_expression_ids')
-
-        for ii in mapped_expr_ids:
+        for ii in mapped_expression_ids:
             for alignment_id, expression_id in ii.items():
                 expression_object = self.ws.get_objects2(
                                                 {'objects':
@@ -449,6 +447,21 @@ class BallgownUtil:
 
         return condition_labels
 
+    def _update_output_file_header(self, output_file):
+        """
+        Modify header of output file (required by DifferentialExpressionUtils)
+        :param output_file: 
+        :return: 
+        """
+        f = open(output_file, 'r')
+        filedata = f.read()
+        f.close()
+
+        modified_output = filedata.replace('"id"\t"fc"\t"pval"\t"qval"', 'gene_id\tlog2_fold_change\tp_value\tq_value')
+
+        f = open(output_file, 'w')
+        f.write(modified_output)
+        f.close()
 
 
     def run_ballgown_app(self, params):
@@ -510,43 +523,62 @@ class BallgownUtil:
 
             expression_set_data = self._transform_expression_set_data(expression_set_data)
 
+        mgroup = MultiGroup(self.ws)
+        pairwise_mapped_expression_ids = mgroup.build_pairwise_groups(expression_set_data['mapped_expression_ids'])
 
-        params['condition_labels'] = self._build_condition_label_list(expression_set_data)
-
-        sample_dir_group_file = self.get_sample_dir_group_file(expression_set_data,
-                                                               params['condition_labels'])
+        diff_expr_files = list()
 
         ballgown_output_dir = os.path.join(self.scratch, "ballgown_out")
         log("ballgown output dir is {0}".format(ballgown_output_dir))
         self._setupWorkingDir(ballgown_output_dir)
 
-        log("about to run_ballgown_diff_exp")
-        rscripts_dir = '/kb/module/rscripts'
+        for mapped_expression_ids in pairwise_mapped_expression_ids:
+            print('processing pairwise combination: ')
+            pprint(mapped_expression_ids)
+            print('with condtion labels: ')
+            condition_labels = self._build_condition_label_list(mapped_expression_ids)
+            pprint(condition_labels)
 
-        output_csv = "ballgown_diffexp.tsv"
-        volcano_plot_file = "volcano_plot.png"
+            sample_dir_group_file = self.get_sample_dir_group_file(mapped_expression_ids,
+                                                                   condition_labels)
 
-        self.run_ballgown_diff_exp(rscripts_dir,
-                                   sample_dir_group_file,
-                                   ballgown_output_dir,
-                                   output_csv,
-                                   volcano_plot_file)
+            log("about to run_ballgown_diff_exp")
+            rscripts_dir = '/kb/module/rscripts'
 
-        log("back from run_ballgown_diff_exp, about to load diff exp matrix file")
-        diff_expr_matrix = self.load_diff_expr_matrix(ballgown_output_dir,
-                                                             output_csv)  # read file before its zipped
+            output_csv = 'ballgown_diffexp_'+condition_labels[0]+'_'+condition_labels[len(condition_labels)-1]+'.tsv'
+            volcano_plot_file = 'volcano_plot_'+condition_labels[0]+'_'+condition_labels[len(condition_labels)-1]+'.png'
 
-        print('differential_expression_matrix: ' + str(diff_expr_matrix))
+            self.run_ballgown_diff_exp(rscripts_dir,
+                                       sample_dir_group_file,
+                                       ballgown_output_dir,
+                                       output_csv,
+                                       volcano_plot_file)
+
+            log("back from run_ballgown_diff_exp, about to load diff exp matrix file")
+            #diff_expr_matrix = self.load_diff_expr_matrix(ballgown_output_dir,
+            #                                                     output_csv)  # read file before its zipped
+
+            self._update_output_file_header(os.path.join(ballgown_output_dir, output_csv))
+
+            diff_expr_file = dict()
+            diff_expr_file.update({'condition_mapping':
+                                       {condition_labels[0]: condition_labels[len(condition_labels)-1]}})
+            diff_expr_file.update({'diffexpr_filepath': os.path.join(ballgown_output_dir, output_csv)})
+            diff_expr_files.append(diff_expr_file)
+
+
+            #print('differential_expression_matrix: ' + str(diff_expr_matrix))
+
 
         deu_param = {
             'destination_ref': params['workspace_name'] + '/' + params['diff_expression_matrix_set_name'],
-            'genome_ref': expression_set_data.get('genome_id'),
+            'diffexpr_data': diff_expr_files,
             'tool_used': TOOL_NAME,
             'tool_version': TOOL_VERSION,
-            'diffexpr_filepath': os.path.join(ballgown_output_dir, output_csv)
+            'genome_ref': expression_set_data.get('genome_id'),
         }
 
-        diff_expression_matrix_set_ref = self.deu.upload_differentialExpression(deu_param)
+        diff_expression_matrix_set_ref = self.deu.save_differential_expression_matrix_set(deu_param)
 
         returnVal = {'result_directory': ballgown_output_dir,
                      'diff_expression_matrix_set_ref': diff_expression_matrix_set_ref['diffExprMatrixSet_ref']}
