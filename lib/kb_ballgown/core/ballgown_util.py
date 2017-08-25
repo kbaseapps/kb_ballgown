@@ -109,8 +109,6 @@ class BallgownUtil:
             diff_exp_object = self.ws.get_objects2(
                 {'objects':
                      [{'ref': data_ref['data'][0]['refs'][ii] }]})['data'][0]
-            print('>>>>diff_exp_obj: ')
-            pprint(diff_exp_object)
             diff_exp_obj_name = diff_exp_object['info'][1]
 
             data_url = re.sub('/services/ws(/)?$', '#jsonview/' + data_ref['data'][0]['refs'][ii], ws_url)
@@ -119,8 +117,11 @@ class BallgownUtil:
                 data_url = re.sub('kbase.us', 'narrative.kbase.us', data_url)
             overview_content += '<p><a href="{}" target="_blank"> JSON view of "{}"</a></p>'.format(
                 data_url, diff_exp_obj_name)
-        print('>>>>>>>content: '+overview_content)
 
+        image_content = ''
+        for image in glob.glob(output_directory+"/*.png"):
+            caption = image.replace(output_directory+'/', '').replace('.png', '')
+            image_content += '<p style="text-align:center"><img align="center" src="{}" width="600" height="400"></a><a target="_blank"><br><p align="center">{}</p></p>'.format(image, caption)
 
 
         with open(result_file_path, 'w') as result_file:
@@ -129,6 +130,8 @@ class BallgownUtil:
                 report_template = report_template_file.read()
                 report_template = report_template.replace('<p>Overview_Content</p>',
                                                           overview_content)
+                report_template = report_template.replace('<p>Image Gallery</p>',
+                                                          image_content)
                 result_file.write(report_template)
 
         report_shock_id = self.dfu.file_to_shock({'file_path': output_directory,
