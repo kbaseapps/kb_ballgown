@@ -120,6 +120,7 @@ class BallgownUtil:
 
         image_content = ''
         for image in glob.glob(output_directory+"/*.png"):
+            image = image.replace(output_directory + '/', '')
             caption = image.replace(output_directory+'/', '').replace('.png', '')
             image_content += '<p style="text-align:center"><img align="center" src="{}" width="600" height="400"></a><a target="_blank"><br><p align="center">{}</p></p>'.format(image, caption)
 
