@@ -111,7 +111,7 @@ div.desc {
     <a target="_blank" href="volcano_plot.png">
       <img src="volcano_plot.png" onerror="this.style.display='none'" width="600" height="400">
     </a>
-    <div class="desc">Volcano Plot (generated only for two condition groups)</div>
+    <div class="desc">Volcano Plot</div>
   </div>
 </div>
 
@@ -132,6 +132,21 @@ function openTab(evt, tabName) {
 
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
+
+var dir = "";
+var fileextension = ".png";
+$.ajax({
+    //This will retrieve the contents of the folder if the folder is configured as 'browsable'
+    url: dir,
+    success: function (data) {
+        //List all .png file names in the page
+        $(data).find("a:contains(" + fileextension + ")").each(function () {
+            var filename = this.href.replace(window.location.host, "").replace("http://", "");
+            var div = document.getElementById('Visualization');
+            div.innerHTML += "<img src='" + dir + filename + "'>";
+        });
+    }
+});
 </script>
 
 </body>

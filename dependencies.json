@@ -5,7 +5,7 @@
 }, {
   "module_name" : "DifferentialExpressionUtils",
   "type" : "sdk",
-  "version_tag" : "release"
+  "version_tag" : "dev"
 }, {
   "module_name" : "ExpressionUtils",
   "type" : "sdk",
