@@ -104,17 +104,22 @@ class BallgownUtil:
             obj_url)
 
         refs = data_ref['data'][0]['refs']
-        items = data_ref['data'][0]['data']['items']
 
         for ii in range(len(refs)):
-            label = items[ii]['label']
-            label = label.replace(', ', '/')
+            diff_exp_object = self.ws.get_objects2(
+                {'objects':
+                     [{'ref': data_ref['data'][0]['refs'][ii] }]})['data'][0]
+            print('>>>>diff_exp_obj: ')
+            pprint(diff_exp_object)
+            diff_exp_obj_name = diff_exp_object['info'][1]
+
             data_url = re.sub('/services/ws(/)?$', '#jsonview/' + data_ref['data'][0]['refs'][ii], ws_url)
             # need to add in the narrative path element for prod
             if data_url.startswith('https://kbase.us'):
                 data_url = re.sub('kbase.us', 'narrative.kbase.us', data_url)
-            overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression data for condition group "{}"</a></p>'.format(
-                data_url, label)
+            overview_content += '<p><a href="{}" target="_blank"> JSON view of "{}"</a></p>'.format(
+                data_url, diff_exp_obj_name)
+        print('>>>>>>>content: '+overview_content)
 
 
 
