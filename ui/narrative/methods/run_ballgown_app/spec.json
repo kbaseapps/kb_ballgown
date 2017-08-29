@@ -30,25 +30,52 @@
       "is_output_name": true
     }
   },{
-    "id" : "fold_change_cutoff",
-    "optional" : false,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "1.5" ],
-    "field_type" : "text",
-    "text_options" : {
-      "validate_as": "float"
+    "id" : "run_all_combinations",
+    "optional":false,
+    "advanced":false,
+    "allow_multiple":false,
+    "default_values":["1"],
+    "field_type" : "checkbox",
+    "checkbox_options":{
+      "checked_value": 1,
+      "unchecked_value": 0
     }
   },{
-    "id" : "alpha_cutoff",
-    "optional" : false,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "0.05" ],
-    "field_type" : "text",
-    "text_options" : {
-      "validate_as": "float"
+    "id": "condition_label_1",
+    "optional": false,
+    "advanced": false,
+    "allow_multiple": false,
+    "default_values": [""],
+    "field_type": "textsubdata",
+    "textsubdata_options" : {
+      "subdata_selection": {
+        "parameter_id" : "expressionset_ref",
+        "subdata_included" : ["items/[*]/label"],
+        "path_to_subdata": ["items"],
+        "selection_id": "label"
+        },
+        "multiselection":false,
+        "show_src_obj":false,
+        "allow_custom":false
     }
+  },{
+      "id": "condition_label_2",
+      "optional": false,
+      "advanced": false,
+      "allow_multiple": false,
+      "default_values": [""],
+      "field_type": "textsubdata",
+      "textsubdata_options" : {
+        "subdata_selection": {
+          "parameter_id" : "expressionset_ref",
+          "subdata_included" : ["items/[*]/label"],
+          "path_to_subdata": ["items"],
+          "selection_id": "label"
+          },
+          "multiselection":false,
+          "show_src_obj":false,
+          "allow_custom":false
+      }
   }],
   "behavior" : {
     "service-mapping" : {
@@ -65,21 +92,9 @@
           "target_property" : "num_threads"
         },
         {
-          "constant_value"  : "log2",
-          "target_property" : "fold_scale_type"
-        },
-        {
           "input_parameter" : "expressionset_ref",
           "target_type_transform": "resolved-ref",
           "target_property" : "expressionset_ref"
-        },
-        {
-          "input_parameter" : "alpha_cutoff",
-          "target_property" : "alpha_cutoff"
-        },
-        {
-          "input_parameter" : "fold_change_cutoff",
-          "target_property" : "fold_change_cutoff"
         },
         {
           "input_parameter" : "diff_expression_matrix_set_suffix",
