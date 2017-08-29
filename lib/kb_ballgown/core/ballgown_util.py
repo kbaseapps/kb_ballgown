@@ -55,12 +55,12 @@ class BallgownUtil:
 
         run_all_combinations = params.get('run_all_combinations')
         condition_pairs = params.get('condition_pairs')
-        '''
+        print('>>>>>>>>>>>>>>condition_pairs: ')
+        pprint(condition_pairs)
         if not self._xor(run_all_combinations, condition_pairs):
             error_msg = "Invalid input:\nselect 'Run All Paired Condition Combinations' "
             error_msg += "or provide partial condition pairs. Don't do both"
             raise ValueError(error_msg)
-        '''
 
 
     def _mkdir_p(self, path):
@@ -278,6 +278,12 @@ class BallgownUtil:
                 self.dfu.shock_to_file({'handle_id': handle_id,
                                         'file_path': expression_dir,
                                         'unpack': 'unpack'})
+
+                required_files = ['e2t.ctab','e_data.ctab','i2t.ctab','i_data.ctab','t_data.ctab']
+                for file in glob.glob(expression_dir+'/*'):
+                    if not os.path.basename(file) in required_files:
+                        os.remove(file)
+
             index += 1
 
         return sgf_name
@@ -600,6 +606,8 @@ class BallgownUtil:
 
         log("User requested pairwise combinations from condition label set : "+str(requested_condition_labels))
 
+        diff_expr_files = list()
+
         for mapped_expression_ids in pairwise_mapped_expression_ids:
             print('processing pairwise combination: ')
             pprint(mapped_expression_ids)
@@ -639,7 +647,6 @@ class BallgownUtil:
 
             self._update_output_file_header(os.path.join(ballgown_output_dir, output_csv))
 
-            diff_expr_files = list()
             diff_expr_file = dict()
             diff_expr_file.update({'condition_mapping':
                                        {condition_labels_uniqued[0]: condition_labels_uniqued[1]}})
@@ -648,7 +655,6 @@ class BallgownUtil:
 
 
             #print('differential_expression_matrix: ' + str(diff_expr_matrix))
-
 
         deu_param = {
             'destination_ref': params['workspace_name'] + '/' + params['diff_expression_matrix_set_name'],
