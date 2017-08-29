@@ -585,8 +585,9 @@ class BallgownUtil:
         available_condition_labels = set(
             self._build_condition_label_list(expression_set_data['mapped_expression_ids']))
 
-        if params.get('run_all_combinations'):
-            requested_condition_labels = available_condition_labels
+        #if params.get('run_all_combinations'):
+        requested_condition_labels = available_condition_labels
+        '''
         else:
             # get set of user specified condition labels
             condition_pairs = params.get('condition_pairs')
@@ -595,6 +596,7 @@ class BallgownUtil:
                 for condition_pair in condition_pairs:
                     requested_condition_labels.add(condition_pair.get('condition_label_1')[0].strip())
                     requested_condition_labels.add(condition_pair.get('condition_label_2')[0].strip())
+        '''
 
         log("User requested pairwise combinations from condition label set : "+str(requested_condition_labels))
 
