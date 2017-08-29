@@ -36,6 +36,9 @@ TOOL_VERSION = '2.8.0'
 class BallgownUtil:
 
 
+    def _xor(self, a, b):
+        return bool(a) != bool(b)
+
     def _validate_run_ballgown_app_params(self, params):
         """
         _validate_run_ballgown_app_params:
@@ -46,12 +49,16 @@ class BallgownUtil:
 
         # check for required parameters
         for p in ['expressionset_ref', 'diff_expression_matrix_set_suffix',
-                  'workspace_name', 'alpha_cutoff', 'fold_change_cutoff']:
+                  'workspace_name']:
             if p not in params:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
-        # check if domain in sampleset object is Eukaryote
-        expressionset_ref = params['expressionset_ref']
+        run_all_combinations = params.get('run_all_combinations')
+        condition_pairs = params.get('condition_pairs')
+        if not self._xor(run_all_combinations, condition_pairs):
+            error_msg = "Invalid input:\nselect 'Run All Paired Condition Combinations' "
+            error_msg += "or provide partial condition pairs. Don't do both"
+            raise ValueError(error_msg)
 
 
     def _mkdir_p(self, path):
@@ -243,8 +250,9 @@ class BallgownUtil:
         self._mkdir_p(group_file_dir)
 
         try:
-            sgf_name = os.path.join(group_file_dir,'sample_dir_group_file_'+condition_labels[0]+'_'+
-                                    condition_labels[1])
+            condition_labels_uniqued = list(set(condition_labels))
+            sgf_name = os.path.join(group_file_dir,'sample_dir_group_file_'+condition_labels_uniqued[0]+'_'+
+                                    condition_labels_uniqued[1])
             sgf = open( sgf_name, "w" )
         except Exception:
             raise Exception( "Can't open file {0} for writing {1}".format( sgf_name, traceback.format_exc() ) )
@@ -479,6 +487,30 @@ class BallgownUtil:
         f.close()
 
 
+    def _check_input_labels(self, condition_pairs, available_condition_labels):
+        """
+        _check_input_labels: check input condition pairs
+        """
+        checked = True
+        for condition_pair in condition_pairs:
+
+            first_label = condition_pair['condition_label_1'][0].strip()
+            second_label = condition_pair['condition_label_2'][0].strip()
+            if first_label not in available_condition_labels:
+                error_msg = 'Condition: {} is not available. '.format(first_label)
+                error_msg += 'Available conditions: {}'.format(available_condition_labels)
+                raise ValueError(error_msg)
+
+            if second_label not in available_condition_labels:
+                error_msg = 'Condition: {} is not available. '.format(second_label)
+                error_msg += 'Available conditions: {}'.format(available_condition_labels)
+                raise ValueError(error_msg)
+
+            if first_label == second_label:
+                raise ValueError('Input conditions are the same')
+
+        return checked
+
     def run_ballgown_app(self, params):
         """
         run_ballgown_app: run Ballgown app
@@ -541,11 +573,28 @@ class BallgownUtil:
         mgroup = MultiGroup(self.ws)
         pairwise_mapped_expression_ids = mgroup.build_pairwise_groups(expression_set_data['mapped_expression_ids'])
 
-        diff_expr_files = list()
+
 
         ballgown_output_dir = os.path.join(self.scratch, "ballgown_out")
         log("ballgown output dir is {0}".format(ballgown_output_dir))
         self._setupWorkingDir(ballgown_output_dir)
+
+        # get set of all condition labels
+        available_condition_labels = set(
+            self._build_condition_label_list(expression_set_data['mapped_expression_ids']))
+
+        if params.get('run_all_combinations'):
+            requested_condition_labels = available_condition_labels
+        else:
+            # get set of user specified condition labels
+            condition_pairs = params.get('condition_pairs')
+            if self._check_input_labels(condition_pairs, available_condition_labels):
+                requested_condition_labels = set()
+                for condition_pair in condition_pairs:
+                    requested_condition_labels.add(condition_pair.get('condition_label_1')[0].strip())
+                    requested_condition_labels.add(condition_pair.get('condition_label_2')[0].strip())
+
+        log("User requested pairwise combinations from condition label set : "+str(requested_condition_labels))
 
         for mapped_expression_ids in pairwise_mapped_expression_ids:
             print('processing pairwise combination: ')
@@ -554,14 +603,25 @@ class BallgownUtil:
             condition_labels = self._build_condition_label_list(mapped_expression_ids)
             pprint(condition_labels)
 
+            # skip if condition labels in this pairwise combination don't exist in
+            # set of user requested condition labels
+            skip = False
+            for condition in condition_labels:
+                if condition not in requested_condition_labels:
+                    log("skipping " + str(condition_labels))
+                    skip = True
+            if skip: continue
+
             sample_dir_group_file = self.get_sample_dir_group_file(mapped_expression_ids,
                                                                    condition_labels)
 
             log("about to run_ballgown_diff_exp")
             rscripts_dir = '/kb/module/rscripts'
 
-            output_csv = 'ballgown_diffexp_'+condition_labels[0]+'_'+condition_labels[len(condition_labels)-1]+'.tsv'
-            volcano_plot_file = 'volcano_plot_'+condition_labels[0]+'_'+condition_labels[len(condition_labels)-1]+'.png'
+            condition_labels_uniqued = list(set(condition_labels))
+
+            output_csv = 'ballgown_diffexp_'+condition_labels_uniqued[0]+'_'+condition_labels_uniqued[1]+'.tsv'
+            volcano_plot_file = 'volcano_plot_'+condition_labels_uniqued[0]+'_'+condition_labels_uniqued[1]+'.png'
 
             self.run_ballgown_diff_exp(rscripts_dir,
                                        sample_dir_group_file,
@@ -575,9 +635,10 @@ class BallgownUtil:
 
             self._update_output_file_header(os.path.join(ballgown_output_dir, output_csv))
 
+            diff_expr_files = list()
             diff_expr_file = dict()
             diff_expr_file.update({'condition_mapping':
-                                       {condition_labels[0]: condition_labels[len(condition_labels)-1]}})
+                                       {condition_labels_uniqued[0]: condition_labels_uniqued[1]}})
             diff_expr_file.update({'diffexpr_filepath': os.path.join(ballgown_output_dir, output_csv)})
             diff_expr_files.append(diff_expr_file)
 
