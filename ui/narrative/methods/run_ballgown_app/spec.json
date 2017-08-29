@@ -77,6 +77,18 @@
           "allow_custom":false
       }
   }],
+  "parameter-groups": [
+    {
+      "id": "condition_pairs",
+      "parameters": [
+        "condition_label_1",
+        "condition_label_2"
+      ],
+      "optional": true,
+      "allow_multiple": true,
+      "with_border": false
+    }
+  ],
   "behavior" : {
     "service-mapping" : {
       "url" : "",
@@ -99,6 +111,22 @@
         {
           "input_parameter" : "diff_expression_matrix_set_suffix",
           "target_property" : "diff_expression_matrix_set_suffix"
+        },
+        {
+          "input_parameter" : "condition_pairs",
+          "target_property" : "condition_pairs"
+        },
+        {
+          "input_parameter" : "condition_label_1",
+          "target_property" : "condition_label_1"
+        },
+        {
+          "input_parameter" : "condition_label_2",
+          "target_property" : "condition_label_2"
+        },
+        {
+          "input_parameter" : "run_all_combinations",
+          "target_property" : "run_all_combinations"
         }],
       "output_mapping" : [
         {
