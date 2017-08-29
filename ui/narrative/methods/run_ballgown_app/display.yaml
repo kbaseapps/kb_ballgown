@@ -49,6 +49,10 @@ parameters :
     short-hint : |
       Second condition in paired condition
 
+parameter-groups :
+    condition_pairs :
+        ui-name : Run Partial Paried Condition Combinations
+        short-hint : Select partial paired condition labels to run (Please uncheck 'Run All Paired Condition Combinations')
 
 description : |
     <p>This App uses the transcripts for two or more samples obtained from either Cufflinks or StringTie to calculate gene and transcript levels in more than one condition and finds significant changes in the expression levels.</p>
