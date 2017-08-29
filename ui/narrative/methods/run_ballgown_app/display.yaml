@@ -33,16 +33,21 @@ parameters :
       Differential Expression Matrix Set Suffix
     short-hint : |
       Provide a suffix for the differential expression analysis output object name
-  alpha_cutoff :
-      ui-name : |
-          Alpha Cutoff
-      short-hint : |
-          q-value (corrected p-value)  cutoff
-  fold_change_cutoff :
-      ui-name : |
-          Fold Change Cutoff
-      short-hint : |
-          Absolute value of fold change cutoff
+  run_all_combinations:
+    ui-name : |
+      Run All Paired Condition Combinations
+    short-hint : |
+      Run All Paired Condition Combinations
+  condition_label_1:
+    ui-name : |
+      First Condition
+    short-hint : |
+      First condition in paired condition
+  condition_label_2:
+    ui-name : |
+      Second Condition
+    short-hint : |
+      Second condition in paired condition
 
 
 description : |

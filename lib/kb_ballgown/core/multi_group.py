@@ -24,16 +24,15 @@ class MultiGroup:
                  expression_object's data sub-element. 
         :return: list of mapped_expression_ids containing pair-wise combinations of condition groups
         """
-        condition_list = self._get_condition_list(mapped_expression_ids)
 
-        # initialize a list of condition to expression maps
+        # initialize a list of dicts keyed on condition and mapped to a list of expression indices
         condition_expression_map = list()
 
         for ii in mapped_expression_ids:
             for alignment_ref, expression_ref in ii.items():
                 wsid, objid, ver = expression_ref.split('/')
                 expression_object = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])[0]
-                condition = expression_object['data']['condition']
+                condition = expression_object['data']['condition']  # get condition of the expression
                 appended = False
                 for jj in range(len(condition_expression_map)):
                     if condition in condition_expression_map[jj]:
@@ -41,9 +40,6 @@ class MultiGroup:
                         appended = True
                 if not appended:
                     condition_expression_map.append({condition: [ii]})
-
-        from pprint import pprint
-        pprint(condition_expression_map)
 
         # initialize pairwise groups
         pairwise_groups = list()   # list of mapped_expression_ids
@@ -58,21 +54,3 @@ class MultiGroup:
 
         return pairwise_groups
 
-
-    def _get_condition_list(self, mapped_expression_ids):
-        """
-        Extracts the condition labels from each expression in the specified mapped expressions
-        and builds a list of condition labels
-        :param expression_set_data: expression set data
-        :return: list of condition labels whose order resembles the expression order in 
-        the mapped expressions
-        """
-        condition_labels = list()
-
-        for ii in mapped_expression_ids:
-            for alignment_ref, expression_ref in ii.items():
-                wsid, objid, ver = expression_ref.split('/')
-                expression_object = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])[0]
-                condition_labels.append(expression_object['data']['condition'])
-
-        return condition_labels
