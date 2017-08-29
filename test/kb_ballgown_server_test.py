@@ -84,7 +84,7 @@ class kb_ballgownTest(unittest.TestCase):
 
         cls.prepare_data()
 
-    '''
+
     @classmethod
     def tearDownClass(cls):
         if hasattr(cls, 'wsName'):
@@ -97,7 +97,6 @@ class kb_ballgownTest(unittest.TestCase):
         if hasattr(cls, 'handles_to_delete'):
             cls.hs.delete_handles(cls.hs.ids_to_handles(cls.handles_to_delete))
             print('Deleted handles ' + str(cls.handles_to_delete))
-    '''
 
     def getWsClient(self):
         return self.__class__.wsClient
@@ -639,9 +638,7 @@ class kb_ballgownTest(unittest.TestCase):
             'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
             'workspace_name': self.wsName,
-            "alpha_cutoff": 0.05,
-            "fold_change_cutoff": 1.5,
-            "fold_scale_type": 'log2'
+            'run_all_combinations': 1
         }
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
@@ -649,18 +646,14 @@ class kb_ballgownTest(unittest.TestCase):
         self.assertEqual(4, len(result))
         print('Results: '+str(result))
 
-
-
     def test_kbasesets_ballgown(self):
 
-        input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
+        input_params = {
         # "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
         "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
-         "diff_expression_matrix_set_suffix": "downsized_KBaseSets_AT_differential_expression_object",
-         "alpha_cutoff": 0.05,
-         "fold_change_cutoff": 300,
-         "fold_scale_type": "log2+1"}
-
+        "diff_expression_matrix_set_suffix": "downsized_KBaseSets_AT_differential_expression_object",
+        "workspace_name": "KBaseRNASeq_test_arfath_2",
+        "run_all_combinations": 1}
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
 
@@ -677,4 +670,37 @@ class kb_ballgownTest(unittest.TestCase):
         """
         bg_util = BallgownUtil(self.__class__.cfg)
         bg_util._check_intron_measurements('data/prokaryote/sample_dir_group_file')
-    
+
+    @raises(Exception)
+    def test_same_condition_specified_twice(self):
+
+        input_params = {
+            #'expressionset_ref': "23748/19/1",
+            'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
+            "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
+            'workspace_name': self.wsName,
+            'run_all_combinations': 0,
+            "condition_pairs": [{'condition_label_1': ['hy5'],
+                                 'condition_label_2': ['hy5']}]
+        }
+
+        self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
+    @raises(Exception)
+    def test_no_condition_specified(self):
+
+        input_params = {
+            # 'expressionset_ref': "23748/19/1",
+            'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
+            "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
+            'workspace_name': self.wsName,
+            'run_all_combinations': 0,
+            "condition_pairs": [{'condition_label_1': ['hy5'],
+                                 'condition_label_2': ['hy5']}]
+        }
+
+        self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
+
