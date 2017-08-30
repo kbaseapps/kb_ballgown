@@ -58,10 +58,12 @@ class BallgownUtil:
         print('>>>>>>>>>>>>>>condition_pairs: ')
         pprint(condition_pairs)
         pprint(run_all_combinations)
+        '''
         if not self._xor(run_all_combinations, condition_pairs):
             error_msg = "Invalid input:\nselect 'Run All Paired Condition Combinations' "
             error_msg += "or provide partial condition pairs. Don't do both"
             raise ValueError(error_msg)
+        '''
 
 
     def _mkdir_p(self, path):
