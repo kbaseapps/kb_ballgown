@@ -54,16 +54,14 @@ class BallgownUtil:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
         run_all_combinations = params.get('run_all_combinations')
-        condition_pairs = params.get('condition_pairs')
-        print('>>>>>>>>>>>>>>condition_pairs: ')
-        pprint(condition_pairs)
+        condition_pair_subset = params.get('condition_pair_subset')
+        print('>>>>>>>>>>>>>>condition_pair_subset: ')
+        pprint(condition_pair_subset)
         pprint(run_all_combinations)
-        '''
-        if not self._xor(run_all_combinations, condition_pairs):
+        if not self._xor(run_all_combinations, condition_pair_subset):
             error_msg = "Invalid input:\nselect 'Run All Paired Condition Combinations' "
-            error_msg += "or provide partial condition pairs. Don't do both"
+            error_msg += "or provide subset of condition pairs. Don't provide both, or neither."
             raise ValueError(error_msg)
-        '''
 
 
     def _mkdir_p(self, path):
@@ -511,27 +509,19 @@ class BallgownUtil:
         f.close()
 
 
-    def _check_input_labels(self, condition_pairs, available_condition_labels):
+    def _check_input_labels(self, condition_pair_subset, available_condition_labels):
         """
         _check_input_labels: check input condition pairs
         """
         checked = True
-        for condition_pair in condition_pairs:
+        # example struct: [{u'condition': u'hy5'}, {u'condition': u'WT'}]
+        for condition in condition_pair_subset:
 
-            first_label = condition_pair['condition_label_1'][0].strip()
-            second_label = condition_pair['condition_label_2'][0].strip()
-            if first_label not in available_condition_labels:
-                error_msg = 'Condition: {} is not available. '.format(first_label)
-                error_msg += 'Available conditions: {}'.format(available_condition_labels)
+            label = condition['condition'].strip()
+            if label not in available_condition_labels:
+                error_msg = 'Condition label "{}" is not a valid condition. '.format(label)
+                error_msg += 'Must be one of "{}"'.format(available_condition_labels)
                 raise ValueError(error_msg)
-
-            if second_label not in available_condition_labels:
-                error_msg = 'Condition: {} is not available. '.format(second_label)
-                error_msg += 'Available conditions: {}'.format(available_condition_labels)
-                raise ValueError(error_msg)
-
-            if first_label == second_label:
-                raise ValueError('Input conditions are the same')
 
         return checked
 
@@ -607,18 +597,16 @@ class BallgownUtil:
         available_condition_labels = set(
             self._build_condition_label_list(expression_set_data['mapped_expression_ids']))
 
-        #if params.get('run_all_combinations'):
-        requested_condition_labels = available_condition_labels
-        '''
+        if params.get('run_all_combinations'):
+            requested_condition_labels = available_condition_labels
         else:
             # get set of user specified condition labels
-            condition_pairs = params.get('condition_pairs')
-            if self._check_input_labels(condition_pairs, available_condition_labels):
+            condition_pair_subset = params.get('condition_pair_subset')
+            if self._check_input_labels(condition_pair_subset, available_condition_labels):
                 requested_condition_labels = set()
-                for condition_pair in condition_pairs:
-                    requested_condition_labels.add(condition_pair.get('condition_label_1')[0].strip())
-                    requested_condition_labels.add(condition_pair.get('condition_label_2')[0].strip())
-        '''
+                # example: [{u'condition': u'hy5'}, {u'condition': u'WT'}]
+                for condition in condition_pair_subset:
+                    requested_condition_labels.add(condition.get('condition').strip())
 
         log("User requested pairwise combinations from condition label set : "+str(requested_condition_labels))
 

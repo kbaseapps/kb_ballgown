@@ -45,8 +45,8 @@ parameters :
             A valid condition label used in the specified expression set
 
 parameter-groups :
-    condition_pairs :
-        ui-name : List at least two conditions on which run or select "Run All Paired Condition Combinations"
+    condition_pair_subset :
+        ui-name : OR List a subset of at least two conditions on which run paired combinations"
         short-hint : Ballgown will run pair-wise combinations of condition pairs from the conditions you list (Please uncheck 'Run All Paired Condition Combinations')
 
 description : |

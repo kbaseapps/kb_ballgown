@@ -50,7 +50,7 @@
   }],
   "parameter-groups": [
       {
-        "id": "condition_pairs",
+        "id": "condition_pair_subset",
         "parameters": ["condition"],
         "optional": false,
         "allow_multiple": true,
@@ -85,8 +85,8 @@
           "target_property" : "run_all_combinations"
         },
         {
-          "input_parameter" : "condition_pairs",
-          "target_property" : "condition_pairs"
+          "input_parameter" : "condition_pair_subset",
+          "target_property" : "condition_pair_subset"
         }],
       "output_mapping" : [
         {
