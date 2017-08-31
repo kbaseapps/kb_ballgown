@@ -100,36 +100,49 @@ class BallgownUtil:
         for file in glob.glob(os.path.join(result_directory, '*.png')):
             shutil.copy(file, output_directory)
 
+        diff_expr_set = self.ws.get_objects2({'objects':
+                                                         [{'ref':
+                                                               diff_expression_matrix_set_ref[
+                                                                   'diffExprMatrixSet_ref']}]})['data'][0]
+        diff_expr_set_data = diff_expr_set['data']
+        diff_expr_set_info = diff_expr_set['info']
+        diff_expr_set_name = diff_expr_set_info[1]
+
         overview_content = ''
-        overview_content += '<p>Differential Expression Matrix Set:</p><p>{}</p>'.format(
-            params.get('diff_expression_matrix_set_name'))
+        overview_content += '<br/><table><tr><th>Generated DifferentialExpressionMatrixSet'
+        overview_content += ' Object</th></tr>'
+        overview_content += '<tr><td>{} ({})'.format(diff_expr_set_name,
+                                                     diff_expression_matrix_set_ref[
+                                                         'diffExprMatrixSet_ref'])
+        overview_content += '</td></tr></table>'
 
-        data_ref = self.ws.get_objects2({'objects':
-                          [{'ref': diff_expression_matrix_set_ref['diffExprMatrixSet_ref']}]})
-        ws_url = self.config['workspace-url']
+        overview_content += '<p><br/></p>'
 
-        obj_url = re.sub('/services/ws(/)?$', '#jsonview/' + diff_expression_matrix_set_ref['diffExprMatrixSet_ref'], ws_url)
-        # need to add in the narrative path element for prod
-        if obj_url.startswith('https://kbase.us'):
-            obj_url = re.sub('kbase.us', 'narrative.kbase.us', obj_url)
-        overview_content += '<p><a href="{}" target="_blank"> JSON view of differential expression object </a></p>'.format(
-            obj_url)
+        overview_content += '<br/><table><tr><th>Generated DifferentialExpressionMatrix'
+        overview_content += ' Object</th><th></th><th></th><th></th></tr>'
+        overview_content += '<tr><th>Differential Expression Matrix Name</th>'
+        overview_content += '<th>Condition 1</th>'
+        overview_content += '<th>Condition 2</th>'
+        overview_content += '</tr>'
 
-        refs = data_ref['data'][0]['refs']
+        for item in diff_expr_set_data['items']:
+            item_diffexprmatrix_object = self.ws.get_objects2({'objects':
+                                                                          [{'ref': item['ref']}]})[
+                'data'][0]
+            item_diffexprmatrix_info = item_diffexprmatrix_object['info']
+            item_diffexprmatrix_data = item_diffexprmatrix_object['data']
+            diffexprmatrix_name = item_diffexprmatrix_info[1]
 
-        for ii in range(len(refs)):
-            diff_exp_object = self.ws.get_objects2(
-                {'objects':
-                     [{'ref': data_ref['data'][0]['refs'][ii] }]})['data'][0]
-            diff_exp_obj_name = diff_exp_object['info'][1]
+            overview_content += '<tr><td>{} ({})</td>'.format(diffexprmatrix_name,
+                                                              item['ref'])
+            overview_content += '<td>{}</td>'.format(item_diffexprmatrix_data.
+                                                     get('condition_mapping').keys()[0])
+            overview_content += '<td>{}</td>'.format(item_diffexprmatrix_data.
+                                                     get('condition_mapping').values()[0])
+            overview_content += '</tr>'
+        overview_content += '</table>'
 
-            data_url = re.sub('/services/ws(/)?$', '#jsonview/' + data_ref['data'][0]['refs'][ii], ws_url)
-            # need to add in the narrative path element for prod
-            if data_url.startswith('https://kbase.us'):
-                data_url = re.sub('kbase.us', 'narrative.kbase.us', data_url)
-            overview_content += '<p><a href="{}" target="_blank"> JSON view of "{}"</a></p>'.format(
-                data_url, diff_exp_obj_name)
-
+        # visualization
         image_content = ''
         for image in glob.glob(output_directory+"/*.png"):
             image = image.replace(output_directory + '/', '')
