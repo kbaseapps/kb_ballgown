@@ -2,7 +2,7 @@ module-name:
     kb_ballgown
 
 module-description:
-    Wraps Ballgown Bioconductor version: Release (3.5)
+    Wraps Ballgown Bioconductor version Release (3.5)
 
 service-language:
     python
