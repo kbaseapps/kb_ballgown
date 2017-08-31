@@ -3,7 +3,6 @@ module-name:
 
 module-description:
     Wraps Ballgown Bioconductor version: Release (3.5)
-    http://bioconductor.org/packages/release/bioc/html/ballgown.html
 
 service-language:
     python
