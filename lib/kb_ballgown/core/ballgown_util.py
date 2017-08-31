@@ -515,6 +515,10 @@ class BallgownUtil:
         """
         checked = True
         # example struct: [{u'condition': u'hy5'}, {u'condition': u'WT'}]
+        if len(condition_pair_subset) < 2:
+            error_msg = 'At least two conditions must be specified. '
+            raise ValueError(error_msg)
+        
         for condition in condition_pair_subset:
 
             label = condition['condition'].strip()
