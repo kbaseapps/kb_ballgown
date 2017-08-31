@@ -52,7 +52,7 @@
       {
         "id": "condition_pair_subset",
         "parameters": ["condition"],
-        "optional": false,
+        "optional": true,
         "allow_multiple": true,
         "with_border": true
       }
