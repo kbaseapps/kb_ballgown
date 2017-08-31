@@ -23,19 +23,19 @@ module kb_ballgown {
       workspace_name: the name of the workspace it gets saved to
 
       optional params:
+      run_all_combinations: run all paired condition combinations
+      condition_labels: conditions for expression set object
       maximum_num_genes: used to filter genes in the differential expression matrix
-      fold_scale_type: one of ["linear", "log2+1", "log10+1"]
 
     */
     typedef structure{
         obj_ref expressionset_ref;
         string diff_expression_matrix_set_suffix;
-        float alpha_cutoff;
-        float fold_change_cutoff;
         int num_threads;
         string workspace_name;
-        int maximum_num_genes;
-        string fold_scale_type;
+
+        boolean run_all_combinations;
+        list<string> condition_labels;
     } BallgownInput;
 
     /*

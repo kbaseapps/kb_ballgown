@@ -21,7 +21,7 @@ from kb_ballgown.core.multi_group import MultiGroup
 
 try:
     from ConfigParser import ConfigParser  # py2
-except:
+except BaseException:
     from configparser import ConfigParser  # py3
 
 from pprint import pprint  # noqa: F401
@@ -84,7 +84,6 @@ class kb_ballgownTest(unittest.TestCase):
 
         cls.prepare_data()
 
-    '''
     @classmethod
     def tearDownClass(cls):
         if hasattr(cls, 'wsName'):
@@ -97,7 +96,6 @@ class kb_ballgownTest(unittest.TestCase):
         if hasattr(cls, 'handles_to_delete'):
             cls.hs.delete_handles(cls.hs.ids_to_handles(cls.handles_to_delete))
             print('Deleted handles ' + str(cls.handles_to_delete))
-    '''
 
     def getWsClient(self):
         return self.__class__.wsClient
@@ -214,10 +212,10 @@ class kb_ballgownTest(unittest.TestCase):
 
         genome_object_name = genbank_file_name
         genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
-                                                    'workspace_name': cls.wsName,
-                                                    'genome_name': genome_object_name,
-                                                    'generate_ids_if_needed': 1
-                                                    })['genome_ref']
+                                                'workspace_name': cls.wsName,
+                                                'genome_name': genome_object_name,
+                                                'generate_ids_if_needed': 1
+                                                })['genome_ref']
 
         # upload annotation
         annotation_ref = cls.upload_annotation('at_chrom1_section', 'at_chrom1_section.gtf')
@@ -229,11 +227,11 @@ class kb_ballgownTest(unittest.TestCase):
 
         reads_object_name_1 = 'test_Reads_1'
         dummy_reads_ref_1 = cls.ru.upload_reads({'fwd_file': reads_file_path,
-                                               'wsname': cls.wsName,
-                                               'sequencing_tech': 'Unknown',
-                                               'interleaved': 0,
-                                               'name': reads_object_name_1
-                                               })['obj_ref']
+                                                 'wsname': cls.wsName,
+                                                 'sequencing_tech': 'Unknown',
+                                                 'interleaved': 0,
+                                                 'name': reads_object_name_1
+                                                 })['obj_ref']
 
         reads_object_name_2 = 'test_Reads_2'
         dummy_reads_ref_2 = cls.ru.upload_reads({'fwd_file': reads_file_path,
@@ -292,18 +290,17 @@ class kb_ballgownTest(unittest.TestCase):
              'assembly_or_genome_ref': genome_ref
              })['obj_ref']
 
-
         # upload hy5_rep1 expression
         source_dir = 'data/extracted_hy5_rep1_hisat2_stringtie_expression'
         expression_name_hy5_rep1 = source_dir
-        copy_to_dir = os.path.join(cls.scratch, source_dir+str(int(time.time() * 1000)))
+        copy_to_dir = os.path.join(cls.scratch, source_dir + str(int(time.time() * 1000)))
         shutil.copytree(source_dir, copy_to_dir)
 
         expression_params_hy5_rep1 = {
-                  'destination_ref': cls.wsName +'/extracted_hy5_rep1_hisat2_stringtie_expression',
-                  'source_dir': copy_to_dir,
-                  'alignment_ref': alignment_ref_hy5_rep1,
-                  'genome_ref': genome_ref }
+            'destination_ref': cls.wsName + '/extracted_hy5_rep1_hisat2_stringtie_expression',
+            'source_dir': copy_to_dir,
+            'alignment_ref': alignment_ref_hy5_rep1,
+            'genome_ref': genome_ref}
         expression_ref_hy5_rep1 = cls.eu.upload_expression(expression_params_hy5_rep1)
 
         # upload hy5_rep2 alignment
@@ -354,7 +351,7 @@ class kb_ballgownTest(unittest.TestCase):
         # upload WT_rep1 expression
         source_dir = 'data/extracted_WT_rep1_hisat2_stringtie_expression'
         expression_name_WT_rep1 = source_dir
-        copy_to_dir = os.path.join(cls.scratch, source_dir+str(int(time.time() * 1000)))
+        copy_to_dir = os.path.join(cls.scratch, source_dir + str(int(time.time() * 1000)))
         shutil.copytree(source_dir, copy_to_dir)
 
         expression_params_WT_rep1 = {
@@ -631,7 +628,7 @@ class kb_ballgownTest(unittest.TestCase):
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
 
-    def test_rnaseq_ballgown(self):
+    def test_run_all_combinations_rnaseq_ballgown(self):
 
         input_params = {
             #'expressionset_ref': "23748/19/1",
@@ -639,42 +636,180 @@ class kb_ballgownTest(unittest.TestCase):
             'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
             'workspace_name': self.wsName,
-            "alpha_cutoff": 0.05,
-            "fold_change_cutoff": 1.5,
-            "fold_scale_type": 'log2'
+            "run_all_combinations": 1,
+            "condition_pair_subset": []
         }
-
-        result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
-
-        self.assertEqual(4, len(result))
-        print('Results: '+str(result))
-
-
-
-    def test_kbasesets_ballgown(self):
-
-        input_params = {"workspace_name": "KBaseRNASeq_test_arfath_2",
-        # "expressionset_ref": "23594/26", # "downsized_AT_reads_hisat2_AlignmentSet_stringtie_ExpressionSet",
-        "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
-         "diff_expression_matrix_set_suffix": "downsized_KBaseSets_AT_differential_expression_object",
-         "alpha_cutoff": 0.05,
-         "fold_change_cutoff": 300,
-         "fold_scale_type": "log2+1"}
-
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
 
         self.assertEqual(4, len(result))
         print('Results: ' + str(result))
 
+    def test_run_all_combinations_kbasesets_ballgown(self):
+
+        input_params = {
+            #"expressionset_ref": "23192/112/1",
+            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "diff_expression_matrix_set_suffix":
+                "downsized_KBaseSets_AT_differential_expression_object",
+            #"workspace_name": "arfath:narrative_1498151834637",
+            'workspace_name': self.wsName,
+            "run_all_combinations": 1,
+            "condition_pair_subset": []
+        }
+
+        result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
+        self.assertEqual(4, len(result))
+        print('Results: ' + str(result))
+
+    def test_run_subset_combinations_kbasesets_ballgown(self):
+
+        input_params = {
+            #"expressionset_ref": "23192/112/1",
+            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "diff_expression_matrix_set_suffix":
+                "downsized_KBaseSets_AT_differential_expression_object",
+            #"workspace_name": "arfath:narrative_1498151834637",
+            'workspace_name': self.wsName,
+            "run_all_combinations": 0,
+            "condition_pair_subset": [
+                {
+                    "condition": "hy5"
+                },
+                {
+                    "condition": "WT"
+                }
+            ]
+        }
+
+        result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
+        self.assertEqual(4, len(result))
+        print('Results: ' + str(result))
 
     @raises(Exception)
     def test_prokaryote_empty_intron_measurement_error(self):
         """
         Ballgown will fail if intron level measurement comes up empty. So catch
         this case and report as error.
-        :return: 
+        :return:
         """
         bg_util = BallgownUtil(self.__class__.cfg)
         bg_util._check_intron_measurements('data/prokaryote/sample_dir_group_file')
-    
+
+    def test_same_condition_specified_twice(self):
+
+        input_params = {
+            #'expressionset_ref': "23748/19/1",
+            'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
+            "diff_expression_matrix_set_suffix":
+                "downsized_RNASeq_AT_differential_expression_object",
+            'workspace_name': self.wsName,
+            'run_all_combinations': 0,
+            "condition_pair_subset": [{'condition': 'hy5'},
+                                      {'condition': 'hy5'}]
+        }
+
+        try:
+            self.getImpl().run_ballgown_app(self.getContext(), input_params)
+        except Exception as ex:
+            self.assertEquals("At least two unique conditions must be specified. ", ex.message)
+
+    def test_no_condition_pair_ballgown(self):
+
+        input_params = {
+            #"expressionset_ref": "23192/112/1",
+            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "diff_expression_matrix_set_suffix":
+                "downsized_KBaseSets_AT_differential_expression_object",
+            #"workspace_name": "arfath:narrative_1498151834637",
+            'workspace_name': self.wsName,
+            "run_all_combinations": 0,
+            "condition_pair_subset": []
+        }
+
+        try:
+            self.getImpl().run_ballgown_app(self.getContext(), input_params)
+        except Exception as ex:
+            self.assertEquals("Invalid input:\nselect 'Run All Paired Condition Combinations' "
+                              "or provide subset of condition pairs. Don't provide both, "
+                              "or neither.", ex.message)
+
+    def test_both_condition_options_ballgown(self):
+
+        # both run_all_combinations and condition_pair_subset are specified
+        input_params = {
+            #"expressionset_ref": "23192/112/1",
+            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "diff_expression_matrix_set_suffix":
+                "downsized_KBaseSets_AT_differential_expression_object",
+            #"workspace_name": "arfath:narrative_1498151834637",
+            'workspace_name': self.wsName,
+            "run_all_combinations": 1,
+            "condition_pair_subset": [
+                {
+                    "condition": "hy5"
+                },
+                {
+                    "condition": "WT"
+                }
+            ]
+        }
+
+        try:
+            self.getImpl().run_ballgown_app(self.getContext(), input_params)
+        except Exception as ex:
+            self.assertEquals("Invalid input:\nselect 'Run All Paired Condition Combinations' "
+                              "or provide subset of condition pairs. Don't provide both, "
+                              "or neither.", ex.message)
+
+    def test_single_condition_ballgown(self):
+
+        # only a single condition is specified (min should be two for condition pairs)
+        input_params = {
+            #"expressionset_ref": "23192/112/1",
+            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "diff_expression_matrix_set_suffix":
+                "downsized_KBaseSets_AT_differential_expression_object",
+            #"workspace_name": "arfath:narrative_1498151834637",
+            'workspace_name': self.wsName,
+            "run_all_combinations": 0,
+            "condition_pair_subset": [
+                {
+                    "condition": "hy5"
+                }
+            ]
+        }
+
+        try:
+            self.getImpl().run_ballgown_app(self.getContext(), input_params)
+        except Exception as ex:
+            self.assertEquals("At least two unique conditions must be specified. ", ex.message)
+
+    def test_invalid_condition_ballgown(self):
+
+        # invalid condition names
+        input_params = {
+            #"expressionset_ref": "23192/112/1",
+            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "diff_expression_matrix_set_suffix":
+                "downsized_KBaseSets_AT_differential_expression_object",
+            #"workspace_name": "arfath:narrative_1498151834637",
+            'workspace_name': self.wsName,
+            "run_all_combinations": 0,
+            "condition_pair_subset": [
+                {
+                    "condition": "dummy1"
+                },
+                {
+                    "condition": "dummy2"
+                }
+            ]
+        }
+
+        try:
+            self.getImpl().run_ballgown_app(self.getContext(), input_params)
+        except Exception as ex:
+            self.assertTrue("is not a valid condition. Must be one of" in ex.message)

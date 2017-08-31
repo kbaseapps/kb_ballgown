@@ -33,17 +33,21 @@ parameters :
       Differential Expression Matrix Set Suffix
     short-hint : |
       Provide a suffix for the differential expression analysis output object name
-  alpha_cutoff :
-      ui-name : |
-          Alpha Cutoff
-      short-hint : |
-          q-value (corrected p-value)  cutoff
-  fold_change_cutoff :
-      ui-name : |
-          Fold Change Cutoff
-      short-hint : |
-          Absolute value of fold change cutoff
+  run_all_combinations:
+    ui-name : |
+      Run All Paired Condition Combinations
+    short-hint : |
+      Run All Paired Condition Combinations
+  condition:
+        ui-name : |
+            Condition Label
+        short-hint : |
+            A valid condition label used in the specified expression set
 
+parameter-groups :
+    condition_pair_subset :
+        ui-name : OR List a subset of at least two conditions on which run paired combinations"
+        short-hint : Ballgown will run pair-wise combinations of condition pairs from the conditions you list (Please uncheck 'Run All Paired Condition Combinations')
 
 description : |
     <p>This App uses the transcripts for two or more samples obtained from either Cufflinks or StringTie to calculate gene and transcript levels in more than one condition and finds significant changes in the expression levels.</p>

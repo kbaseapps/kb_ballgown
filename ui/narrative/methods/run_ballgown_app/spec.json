@@ -30,26 +30,33 @@
       "is_output_name": true
     }
   },{
-    "id" : "fold_change_cutoff",
-    "optional" : false,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "1.5" ],
-    "field_type" : "text",
-    "text_options" : {
-      "validate_as": "float"
+    "id" : "run_all_combinations",
+    "optional":false,
+    "advanced":false,
+    "allow_multiple":false,
+    "default_values":["1"],
+    "field_type" : "checkbox",
+    "checkbox_options":{
+      "checked_value": 1,
+      "unchecked_value": 0
     }
   },{
-    "id" : "alpha_cutoff",
+    "id" : "condition",
     "optional" : false,
     "advanced" : false,
     "allow_multiple" : false,
-    "default_values" : [ "0.05" ],
-    "field_type" : "text",
-    "text_options" : {
-      "validate_as": "float"
-    }
+    "default_values" : [ "" ],
+    "field_type" : "text"
   }],
+  "parameter-groups": [
+      {
+        "id": "condition_pair_subset",
+        "parameters": ["condition"],
+        "optional": true,
+        "allow_multiple": true,
+        "with_border": true
+      }
+  ],
   "behavior" : {
     "service-mapping" : {
       "url" : "",
@@ -65,25 +72,21 @@
           "target_property" : "num_threads"
         },
         {
-          "constant_value"  : "log2",
-          "target_property" : "fold_scale_type"
-        },
-        {
           "input_parameter" : "expressionset_ref",
           "target_type_transform": "resolved-ref",
           "target_property" : "expressionset_ref"
         },
         {
-          "input_parameter" : "alpha_cutoff",
-          "target_property" : "alpha_cutoff"
-        },
-        {
-          "input_parameter" : "fold_change_cutoff",
-          "target_property" : "fold_change_cutoff"
-        },
-        {
           "input_parameter" : "diff_expression_matrix_set_suffix",
           "target_property" : "diff_expression_matrix_set_suffix"
+        },
+        {
+          "input_parameter" : "run_all_combinations",
+          "target_property" : "run_all_combinations"
+        },
+        {
+          "input_parameter" : "condition_pair_subset",
+          "target_property" : "condition_pair_subset"
         }],
       "output_mapping" : [
         {
