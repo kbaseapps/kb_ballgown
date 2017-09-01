@@ -25,9 +25,9 @@ method-suggestions :
 parameters :
   expressionset_ref :
     ui-name : |
-      RNA-seq Expression Set or KBaseSets Expression Set
+      Expression Set
     short-hint : |
-      Select the RNA-seq expression set or KBaseSets expression set associated with transcripts assembled by Cufflinks or StringTie.
+      Select the expression set associated with transcripts assembled by Cufflinks or StringTie.
   diff_expression_matrix_set_suffix :
     ui-name : |
       Differential Expression Matrix Set Suffix
