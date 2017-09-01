@@ -607,8 +607,8 @@ class BallgownUtil:
         self._setupWorkingDir(ballgown_output_dir)
 
         # get set of all condition labels
-        available_condition_labels = set(
-            self._build_condition_label_list(expression_set_data['mapped_expression_ids']))
+        available_condition_labels = \
+            self._build_condition_label_list(expression_set_data['mapped_expression_ids'])
 
         if params.get('run_all_combinations'):
             requested_condition_labels = available_condition_labels
@@ -616,12 +616,13 @@ class BallgownUtil:
             # get set of user specified condition labels
             condition_pair_subset = params.get('condition_pair_subset')
             if self._check_input_labels(condition_pair_subset, available_condition_labels):
-                requested_condition_labels = set()
+                requested_condition_labels = list()
                 # example: [{u'condition': u'hy5'}, {u'condition': u'WT'}]
                 for condition in condition_pair_subset:
-                    requested_condition_labels.add(condition.get('condition').strip())
+                    if condition.get('condition').strip() not in requested_condition_labels:
+                        requested_condition_labels.append(condition.get('condition').strip())
 
-        log("User requested pairwise combinations from condition label set : " +
+        log("User requested pairwise combinations from condition label list : " +
             str(requested_condition_labels))
 
         diff_expr_files = list()
@@ -649,7 +650,10 @@ class BallgownUtil:
             log("about to run_ballgown_diff_exp")
             rscripts_dir = '/kb/module/rscripts'
 
-            condition_labels_uniqued = list(set(condition_labels))
+            condition_labels_uniqued = list()
+            for condition in condition_labels:
+                if condition not in condition_labels_uniqued:
+                    condition_labels_uniqued.append(condition)
 
             output_csv = 'ballgown_diffexp_' + \
                 condition_labels_uniqued[0] + '_' + condition_labels_uniqued[1] + '.tsv'
