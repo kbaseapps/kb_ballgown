@@ -4,7 +4,7 @@
 name     : Create Differential Expression Matrix using Ballgown
 
 tooltip  : |
-    Create differential expression matrix based on a given threshold cutoff
+    Create differential expression matrix based on a given threshold cutoff (for eukaryotes only)
 screenshots :
     []
 
@@ -27,7 +27,7 @@ parameters :
     ui-name : |
       Expression Set
     short-hint : |
-      Select the expression set associated with transcripts assembled by Cufflinks or StringTie.
+      Select the expression set associated with transcripts assembled by Cufflinks or StringTie
   diff_expression_matrix_set_suffix :
     ui-name : |
       Differential Expression Matrix Set Suffix
@@ -46,18 +46,20 @@ parameters :
 
 parameter-groups :
     condition_pair_subset :
-        ui-name : OR List a subset of at least two conditions on which run paired combinations"
-        short-hint : Ballgown will run pair-wise combinations of condition pairs from the conditions you list (Please uncheck 'Run All Paired Condition Combinations')
+        ui-name : OR list a subset of at least two conditions on which to run paired combinations
+        short-hint : Ballgown will run pairwise combinations of condition pairs from the conditions you list (If you choose this option, please uncheck 'Run All Paired Condition Combinations')
 
 description : |
-    <p>This App allows the users to select the single-end or paired-end read files and provide the metadata for a set of samples to create RNASeqSampleSet object. Note that the user must provide reads for two or more samples.</p>
+    <p>This App allows users to select the single-end or paired-end read files and provide the metadata for a set of samples to create an RNASeqSampleSet object. Note that the user must provide reads for two or more samples.</p>
 
-    <p>Users need to import single-end or paired-end read files to the Data Pane before starting this App.</p>
+    <p>Users need to import single-end or paired-end read files to their Narrative before starting this App.</p>
 
-    <p>It is mandatory for users to select the "Library Type", "Domain", "RNA-seq Sample and Condition Labels" and provide the "RNA-seq Sample Set" (RNASeqSampleSet object name). All replicates for the same condition must have same label.</p>
+    <p>It is mandatory to select the "Library Type", "Domain", "RNA-seq Sample and Condition Labels" and provide the "RNA-seq Sample Set" (RNASeqSampleSet object name). All replicates for the same condition must have same label.</p>
 
     <p>Users can optionally fill in additional metadata information in the advanced options.</p>
-
+    
+    <p><b>Note: Ballgown requires at least one intron to function. Also, this app will not work on prokaryotes.</b></p>
 
     <p><strong>Team members who developed & deployed algorithm in KBase:</strong>
-    Srividya Ramakrishnan, Sunita Kumari, Shinjae Yoo, Priya Ranjan, Jim Thomason, Vivek Kumar, Arfath Pasha. For questions, <a href="mailto:help@kbase.us">e-mail help@kbase.us</a></p>
+    Srividya Ramakrishnan, Sunita Kumari, Shinjae Yoo, Priya Ranjan, Jim Thomason, Vivek Kumar, Arfath Pasha. For questions, please <a href="http://kbase.us/contact-us/">contact us</a>.</p>
+    
