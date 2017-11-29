@@ -1,10 +1,13 @@
 #
 # Define basic display information
 #
-name     : Create Differential Expression Matrix using Ballgown
+name     : Create Differential Expression Matrix using Ballgown - v3.5
 
 tooltip  : |
     Create differential expression matrix based on a given threshold cutoff (for eukaryotes only)
+
+icon: ballgown-yellow.png
+
 screenshots :
     []
 

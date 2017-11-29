@@ -21,8 +21,8 @@ class kb_ballgown:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.1"
-    GIT_URL = "git@github.com:arfathpasha/kb_ballgown.git"
+    VERSION = "1.0.3"
+    GIT_URL = "https://github.com/kbaseapps/kb_ballgown"
     GIT_COMMIT_HASH = "c88d867578f0bcb72e64397c66e5b01575f3876c"
 
     #BEGIN_CLASS_HEADER
