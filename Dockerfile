@@ -35,8 +35,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN echo "##########" About to install a new R "###########" && \
 	apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install r-base
 
-RUN echo "##########" About to load bioconductor and ballgown "###########" && \
-	R -q -e 'chooseCRANmirror(ind=48); install.packages(c("getopt")); source("https://bioconductor.org/biocLite.R"); biocLite("ballgown")' && \
+RUN echo "#############" About to load bioconductor and ballgown "##############" && \
+	R -q -e 'chooseCRANmirror(ind=134); install.packages(c("getopt")); source("https://bioconductor.org/biocLite.R"); biocLite("ballgown")' && \
 	echo "##########" Finished loading bioconductor and ballgown "###########" && \
 	echo Completed: R and Bioconductor update, followed by Ballgown installation
 
