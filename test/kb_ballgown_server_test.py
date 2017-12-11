@@ -628,6 +628,7 @@ class kb_ballgownTest(unittest.TestCase):
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
 
+
     def test_run_all_combinations_rnaseq_ballgown(self):
 
         input_params = {
@@ -649,7 +650,7 @@ class kb_ballgownTest(unittest.TestCase):
 
         input_params = {
             #"expressionset_ref": "23192/112/1",
-            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "expressionset_ref": self.kbasesets_expression_set_ref,
             "diff_expression_matrix_set_suffix":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",
@@ -662,6 +663,7 @@ class kb_ballgownTest(unittest.TestCase):
 
         self.assertEqual(4, len(result))
         print('Results: ' + str(result))
+
 
     def test_run_subset_combinations_kbasesets_ballgown(self):
 
@@ -782,7 +784,6 @@ class kb_ballgownTest(unittest.TestCase):
                 }
             ]
         }
-
         try:
             self.getImpl().run_ballgown_app(self.getContext(), input_params)
         except Exception as ex:
@@ -813,3 +814,4 @@ class kb_ballgownTest(unittest.TestCase):
             self.getImpl().run_ballgown_app(self.getContext(), input_params)
         except Exception as ex:
             self.assertTrue("is not a valid condition. Must be one of" in ex.message)
+
