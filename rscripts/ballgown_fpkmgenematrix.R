@@ -12,6 +12,7 @@
 #                              --output_csvfile         <filename for diff exp matrix>  (required)
 #                              --volcano_plot_file      <filename for volcano plot>     (optional)
 #                                                       (only available if there are two condition groups)
+#                              --variance_cutoff        <numeric>                       (optional, recommended: 1)
 #
 #                      planned, not yet implemented:
 #                              --p_dist_plot_file 
@@ -79,6 +80,8 @@ dmesg( "getwd() is", getwd() )
 
 suppressMessages( require("getopt") )
 suppressMessages( require( ballgown ) )
+suppressMessages( require( genefilter ) )   # for rowVars()
+
 #suxppressMessages(require (rjson))
 
 options( showWarnCalls = FALSE )
@@ -91,6 +94,8 @@ option_tab = matrix( c(
                        'output_dir',             'O', 1, 'character',  # where output file(s) go
                        'output_csvfile',         'o', 1, 'character',  # output differential gene expression CSV file name
                        'volcano_plot_file',      'V', 1, 'character',  # if given, generated volcano plot file of this name (png)
+		       'variance_cutoff',        'c', 1, 'double',     # if specified apply variance cut value to genes to remove
+                                                                       # those which don't show any variation before applying statistics
                        'p_dist_plot_file',       'Q', 1, 'character', 
                        'q_dist_plot_file',       'P', 1, 'character',
                        'fc_log',                 'L', 1, 'character',  # <"linear","log2+1","log10+1">   
@@ -143,11 +148,20 @@ dmesg( "here is pData(bg)" )
 print( pData(bg) )
 
 
-dmesg( "about to stattest" )
+#
+# apply a low-variance cut 
+# 
+if ( is.null( opt$variance_cutoff ) ) {
+    bgf <- bg
+ } else {
+    dmesg( paste( "applying a low-variance cut of", opt$variance_cutoff ) )
+    bgf <- subset( bg, paste( "rowVars( texpr( bg ) ) >", opt$variance_cutoff),  genomesubset=TRUE )
+ }
 
 # create gene-level differential expression table
+dmesg( "about to stattest" )
 
-gene_diff_ex_tab <- stattest( bg, feature='gene', meas='FPKM', covariate='group', 
+gene_diff_ex_tab <- stattest( bgf, feature='gene', meas='FPKM', covariate='group', 
                               getFC = (ncond == 2) )
 
 # for more than two conditions, we need to add in a column of NA for fold change to
