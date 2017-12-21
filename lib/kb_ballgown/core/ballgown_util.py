@@ -42,7 +42,7 @@ class BallgownUtil:
         self.dfu = DataFileUtil(self.callback_url)
         self.rau = ReadsAlignmentUtils(self.callback_url)
         self.fv = KBaseFeatureValues(self.callback_url)
-        self.deu = DifferentialExpressionUtils(self.callback_url, service_ver='dev')
+        self.deu = DifferentialExpressionUtils(self.callback_url)
         self.ws = Workspace(self.ws_url, token=self.token)
         self.scratch = config['scratch']
         self.config = config
