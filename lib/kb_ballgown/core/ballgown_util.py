@@ -385,7 +385,8 @@ class BallgownUtil:
                      '--sample_dir_group_table', sample_dir_group_table_file,
                      '--output_dir', ballgown_output_dir,
                      '--output_csvfile', output_csv,
-                     '--volcano_plot_file', volcano_plot_file
+                     '--volcano_plot_file', volcano_plot_file,
+                     '--variance_cutoff', 1 
                      ]
         rcmd_str = " ".join(str(x) for x in rcmd_list)
         log("rcmd_string is {0}".format(rcmd_str))
