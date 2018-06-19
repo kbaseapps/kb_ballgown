@@ -1,35 +1,31 @@
 # -*- coding: utf-8 -*-
-import unittest
 import os  # noqa: F401
-import json  # noqa: F401
-import time
-import requests
-
-from os import environ
-
 import shutil
-from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
-from DataFileUtil.DataFileUtilClient import DataFileUtil
-from ReadsUtils.ReadsUtilsClient import ReadsUtils
-from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
-from ExpressionUtils.ExpressionUtilsClient import ExpressionUtils
-from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport
-from SetAPI.SetAPIClient import SetAPI
-from kb_ballgown.core.ballgown_util import BallgownUtil
+import time
+import unittest
+from os import environ
+from pprint import pprint  # noqa: F401
+
+import requests
 from nose.tools import raises
-from kb_ballgown.core.multi_group import MultiGroup
 
 try:
     from ConfigParser import ConfigParser  # py2
 except BaseException:
     from configparser import ConfigParser  # py3
 
-from pprint import pprint  # noqa: F401
-
+from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport
 from biokbase.workspace.client import Workspace as workspaceService
+from DataFileUtil.DataFileUtilClient import DataFileUtil
+from ExpressionUtils.ExpressionUtilsClient import ExpressionUtils
+from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
+from kb_ballgown.authclient import KBaseAuth as _KBaseAuth
+from kb_ballgown.core.ballgown_util import BallgownUtil
 from kb_ballgown.kb_ballgownImpl import kb_ballgown
 from kb_ballgown.kb_ballgownServer import MethodContext
-from kb_ballgown.authclient import KBaseAuth as _KBaseAuth
+from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
+from ReadsUtils.ReadsUtilsClient import ReadsUtils
+from SetAPI.SetAPIClient import SetAPI
 
 
 class kb_ballgownTest(unittest.TestCase):
@@ -93,7 +89,7 @@ class kb_ballgownTest(unittest.TestCase):
         if hasattr(cls, 'nodes_to_delete'):
             for node in cls.nodes_to_delete:
                 cls.delete_shock_node(node)
-        if hasattr(cls, 'handles_to_delete'):
+        if hasattr(cls, 'handles_to_delete') and len(cls.handles_to_delete):
             cls.hs.delete_handles(cls.hs.ids_to_handles(cls.handles_to_delete))
             print('Deleted handles ' + str(cls.handles_to_delete))
 
@@ -214,7 +210,8 @@ class kb_ballgownTest(unittest.TestCase):
         genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
                                                 'workspace_name': cls.wsName,
                                                 'genome_name': genome_object_name,
-                                                'generate_ids_if_needed': 1
+                                                'generate_ids_if_needed': 1,
+                                                'generate_missing_genes': 1
                                                 })['genome_ref']
 
         # upload annotation
@@ -458,6 +455,8 @@ class kb_ballgownTest(unittest.TestCase):
             'sampleset_desc': 'test sampleset object',
             'Library_type': 'SingleEnd',
             'condition': ['hy5', 'hy5', 'WT', 'WT', 'GT', 'GT'],
+            'sample_ids': [dummy_reads_ref_1, dummy_reads_ref_2, dummy_reads_ref_3,
+                           dummy_reads_ref_4, dummy_reads_ref_5, dummy_reads_ref_6],
             'domain': 'Eukaryotes',
             'num_samples': 3,
             'platform': 'Unknown'}
@@ -632,13 +631,32 @@ class kb_ballgownTest(unittest.TestCase):
     def test_run_all_combinations_rnaseq_ballgown(self):
 
         input_params = {
-            #'expressionset_ref': "23748/19/1",
+            #'expressionset_ref': "30996/40/1",
             'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
             'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
             'workspace_name': self.wsName,
             "run_all_combinations": 1,
-            "condition_pair_subset": []
+            "condition_pair_subset": [],
+            'input_type': "genes"
+        }
+
+        result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
+
+        self.assertEqual(4, len(result))
+        print('Results: ' + str(result))
+
+    def test_run_all_combinations_transcripts_ballgown(self):
+
+        input_params = {
+            'expressionset_ref': "30996/40/1",
+            #'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
+            "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
+            'workspace_name': self.wsName,
+            "run_all_combinations": 1,
+            "condition_pair_subset": [],
+            'input_type': "transcripts"
         }
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]
@@ -656,7 +674,8 @@ class kb_ballgownTest(unittest.TestCase):
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
             "run_all_combinations": 1,
-            "condition_pair_subset": []
+            "condition_pair_subset": [],
+            'input_type': "genes"
         }
 
         result = self.getImpl().run_ballgown_app(self.getContext(), input_params)[0]

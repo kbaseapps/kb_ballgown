@@ -30,6 +30,22 @@
       "is_output_name": true
     }
   },{
+      "id": "input_type",
+      "optional": false,
+      "advanced": false,
+      "allow_multiple": false,
+      "default_values": [ "genes" ],
+      "field_type": "dropdown",
+      "dropdown_options": {
+          "options": [{
+              "display": "Genes",
+              "value": "genes"
+          }, {
+              "display": "Transcripts",
+              "value": "transcripts"
+          }]
+      }
+  },{
     "id" : "run_all_combinations",
     "optional":false,
     "advanced":false,

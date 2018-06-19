@@ -33,6 +33,7 @@ module kb_ballgown {
         string diff_expression_matrix_set_suffix;
         int num_threads;
         string workspace_name;
+        string input_type;
 
         boolean run_all_combinations;
         list<string> condition_labels;

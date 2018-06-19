@@ -124,13 +124,13 @@ $returnVal is a kb_ballgown.BallgownResult
 BallgownInput is a reference to a hash where the following keys are defined:
 	expressionset_ref has a value which is a kb_ballgown.obj_ref
 	diff_expression_matrix_set_suffix has a value which is a string
-	alpha_cutoff has a value which is a float
-	fold_change_cutoff has a value which is a float
 	num_threads has a value which is an int
 	workspace_name has a value which is a string
-	maximum_num_genes has a value which is an int
-	fold_scale_type has a value which is a string
+	input_type has a value which is a string
+	run_all_combinations has a value which is a kb_ballgown.boolean
+	condition_labels has a value which is a reference to a list where each element is a string
 obj_ref is a string
+boolean is an int
 BallgownResult is a reference to a hash where the following keys are defined:
 	result_directory has a value which is a string
 	diff_expression_matrix_set_ref has a value which is a kb_ballgown.obj_ref
@@ -148,13 +148,13 @@ $returnVal is a kb_ballgown.BallgownResult
 BallgownInput is a reference to a hash where the following keys are defined:
 	expressionset_ref has a value which is a kb_ballgown.obj_ref
 	diff_expression_matrix_set_suffix has a value which is a string
-	alpha_cutoff has a value which is a float
-	fold_change_cutoff has a value which is a float
 	num_threads has a value which is an int
 	workspace_name has a value which is a string
-	maximum_num_genes has a value which is an int
-	fold_scale_type has a value which is a string
+	input_type has a value which is a string
+	run_all_combinations has a value which is a kb_ballgown.boolean
+	condition_labels has a value which is a reference to a list where each element is a string
 obj_ref is a string
+boolean is an int
 BallgownResult is a reference to a hash where the following keys are defined:
 	result_directory has a value which is a string
 	diff_expression_matrix_set_ref has a value which is a kb_ballgown.obj_ref
@@ -389,8 +389,9 @@ num_threads: number of threads
 workspace_name: the name of the workspace it gets saved to
 
 optional params:
+run_all_combinations: run all paired condition combinations
+condition_labels: conditions for expression set object
 maximum_num_genes: used to filter genes in the differential expression matrix
-fold_scale_type: one of ["linear", "log2+1", "log10+1"]
 
 
 =item Definition
@@ -401,12 +402,11 @@ fold_scale_type: one of ["linear", "log2+1", "log10+1"]
 a reference to a hash where the following keys are defined:
 expressionset_ref has a value which is a kb_ballgown.obj_ref
 diff_expression_matrix_set_suffix has a value which is a string
-alpha_cutoff has a value which is a float
-fold_change_cutoff has a value which is a float
 num_threads has a value which is an int
 workspace_name has a value which is a string
-maximum_num_genes has a value which is an int
-fold_scale_type has a value which is a string
+input_type has a value which is a string
+run_all_combinations has a value which is a kb_ballgown.boolean
+condition_labels has a value which is a reference to a list where each element is a string
 
 </pre>
 
@@ -417,12 +417,11 @@ fold_scale_type has a value which is a string
 a reference to a hash where the following keys are defined:
 expressionset_ref has a value which is a kb_ballgown.obj_ref
 diff_expression_matrix_set_suffix has a value which is a string
-alpha_cutoff has a value which is a float
-fold_change_cutoff has a value which is a float
 num_threads has a value which is an int
 workspace_name has a value which is a string
-maximum_num_genes has a value which is an int
-fold_scale_type has a value which is a string
+input_type has a value which is a string
+run_all_combinations has a value which is a kb_ballgown.boolean
+condition_labels has a value which is a reference to a list where each element is a string
 
 
 =end text
