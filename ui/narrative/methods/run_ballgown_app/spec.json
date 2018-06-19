@@ -65,6 +65,10 @@
       "method" : "run_ballgown_app",
       "input_mapping" : [
         {
+          "input_parameter" : "input_type",
+          "target_property" : "input_type"
+        },
+        {
           "narrative_system_variable": "workspace",
           "target_property" : "workspace_name"
         },
