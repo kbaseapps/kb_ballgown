@@ -569,7 +569,7 @@ class BallgownUtil:
         expression_object_type = expression_set_info[2]
 
         # set output object name
-        differential_expression_suffix = params['diff_expression_matrix_set_suffix']
+        """differential_expression_suffix = params['diff_expression_matrix_set_suffix']
         expression_name = expression_set_info[1]
         if re.match('.*_[Ee]xpression$', expression_name):
             params['diff_expression_matrix_set_name'] = re.sub(
@@ -582,7 +582,7 @@ class BallgownUtil:
                 differential_expression_suffix
 
         log('--->\nexpression object type: \n' +
-            '{}'.format(expression_object_type))
+            '{}'.format(expression_object_type))"""
 
         if re.match('KBaseRNASeq.RNASeqExpressionSet-\d.\d', expression_object_type):
             expression_set_data = self.ws.get_objects2(

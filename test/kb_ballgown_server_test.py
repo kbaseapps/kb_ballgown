@@ -210,6 +210,7 @@ class kb_ballgownTest(unittest.TestCase):
         genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
                                                 'workspace_name': cls.wsName,
                                                 'genome_name': genome_object_name,
+                                                'source': 'Ensembl',
                                                 'generate_ids_if_needed': 1,
                                                 'generate_missing_genes': 1
                                                 })['genome_ref']
@@ -669,6 +670,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.kbasesets_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",
@@ -689,6 +691,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",
@@ -743,6 +746,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",
@@ -764,6 +768,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",
@@ -792,6 +797,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",
@@ -814,6 +820,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            'diff_expression_matrix_set_name': 'MyDiffExpression',
             "diff_expression_matrix_set_suffix":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",

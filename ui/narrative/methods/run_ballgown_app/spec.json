@@ -19,11 +19,11 @@
       "valid_ws_types" : ["KBaseRNASeq.RNASeqExpressionSet", "KBaseSets.ExpressionSet"]
     }
   },{
-    "id" : "diff_expression_matrix_set_suffix",
+    "id" : "diff_expression_matrix_set_name",
     "optional" : false,
     "advanced" : false,
     "allow_multiple" : false,
-    "default_values" : [ "_differential_expression" ],
+    "default_values" : [],
     "field_type" : "text",
     "text_options" : {
       "valid_ws_types" : ["KBaseSets.DifferentialExpressionMatrixSet"],
@@ -82,8 +82,8 @@
           "target_property" : "expressionset_ref"
         },
         {
-          "input_parameter" : "diff_expression_matrix_set_suffix",
-          "target_property" : "diff_expression_matrix_set_suffix"
+          "input_parameter" : "diff_expression_matrix_set_name",
+          "target_property" : "diff_expression_matrix_set_name"
         },
         {
           "input_parameter" : "run_all_combinations",
