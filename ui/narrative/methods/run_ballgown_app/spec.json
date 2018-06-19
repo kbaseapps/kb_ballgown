@@ -40,24 +40,9 @@
       "checked_value": 1,
       "unchecked_value": 0
     }
-  },{
-    "id" : "condition",
-    "optional" : false,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "" ],
-    "field_type" : "text"
   }],
-  "parameter-groups": [
-      {
-        "id": "condition_pair_subset",
-        "parameters": ["condition"],
-        "optional": true,
-        "allow_multiple": true,
-        "with_border": true
-      }
-  ],
-  "behavior" : {
+ "parameter-groups": [],
+ "behavior" : {
     "service-mapping" : {
       "url" : "",
       "name" : "kb_ballgown",
@@ -83,11 +68,8 @@
         {
           "input_parameter" : "run_all_combinations",
           "target_property" : "run_all_combinations"
-        },
-        {
-          "input_parameter" : "condition_pair_subset",
-          "target_property" : "condition_pair_subset"
-        }],
+        }
+      ],
       "output_mapping" : [
         {
           "service_method_output_path": [0, "result_directory"],
