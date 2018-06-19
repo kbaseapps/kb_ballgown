@@ -381,6 +381,7 @@ class BallgownUtil:
                      '--output_dir', ballgown_output_dir,
                      '--output_csvfile', output_csv,
                      '--volcano_plot_file', volcano_plot_file,
+                     '--variance_cutoff', 1 
                      ]
         if data_type == 'transcripts':
             rcmd_list.append('--transcripts')
