@@ -174,13 +174,16 @@ if (! is.null(opt$transcript)){
 # for more than two conditions, we need to add in a column of NA for fold change to
 # preserve the table format
 
-if ( ncond > 2 )
+if ( ncond > 2 ) {
    diff_ex_tab <- data.frame( feature = diff_ex_tab$feature,
                                    id = diff_ex_tab$id,
                                    fc = NA,
                                    pval = diff_ex_tab$pval,
                                    qval = diff_ex_tab$qval
                                  )
+} else {
+    diff_ex_tab$fc <- log2( diff_ex_tab$fc )
+}
 
 dmesg( "about to write.table" )
 
