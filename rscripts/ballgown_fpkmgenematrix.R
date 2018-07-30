@@ -10,6 +10,7 @@
 # ./ballgown_fpkmgenematrix.R  --sample_dir_group_table <sample_group_table>            (required)
 #                              --output_dir             <dir name>                      (required)
 #                              --output_csvfile         <filename for diff exp matrix>  (required)
+#                              --transcripts            <use transcripts instead>       (optional)
 #                              --volcano_plot_file      <filename for volcano plot>     (optional)
 #                                                       (only available if there are two condition groups)
 #                              --variance_cutoff        <numeric>                       (optional, recommended: 1)
@@ -93,6 +94,7 @@ option_tab = matrix( c(
                        'sample_dir_group_table', 's', 1, 'character',  # file containing table of sample_dir, group id (integer)
                        'output_dir',             'O', 1, 'character',  # where output file(s) go
                        'output_csvfile',         'o', 1, 'character',  # output differential gene expression CSV file name
+                       'transcripts',            't', 0, 'logical',
                        'volcano_plot_file',      'V', 1, 'character',  # if given, generated volcano plot file of this name (png)
 		       'variance_cutoff',        'c', 1, 'double',     # if specified apply variance cut value to genes to remove
                                                                        # those which don't show any variation before applying statistics
@@ -161,23 +163,31 @@ if ( is.null( opt$variance_cutoff ) ) {
 # create gene-level differential expression table
 dmesg( "about to stattest" )
 
-gene_diff_ex_tab <- stattest( bgf, feature='gene', meas='FPKM', covariate='group', 
-                              getFC = (ncond == 2) )
+if (! is.null(opt$transcript)){
+    diff_ex_tab <- stattest( bgf, feature='transcript', meas='FPKM', covariate='group',
+                                  getFC = (ncond == 2) )
+    diff_ex_tab$id = ballgown::transcriptNames(bgf)
+} else {
+    diff_ex_tab <- stattest( bgf, feature='gene', meas='FPKM', covariate='group', getFC = (ncond == 2) )
+}
 
 # for more than two conditions, we need to add in a column of NA for fold change to
 # preserve the table format
 
-if ( ncond > 2 )
-   gene_diff_ex_tab <- data.frame( feature = gene_diff_ex_tab$feature,
-                                   id = gene_diff_ex_tab$id,
+if ( ncond > 2 ) {
+   diff_ex_tab <- data.frame( feature = diff_ex_tab$feature,
+                                   id = diff_ex_tab$id,
                                    fc = NA,
-                                   pval = gene_diff_ex_tab$pval,
-                                   qval = gene_diff_ex_tab$qval
+                                   pval = diff_ex_tab$pval,
+                                   qval = diff_ex_tab$qval
                                  )
+} else {
+    diff_ex_tab$fc <- log2( diff_ex_tab$fc )
+}
 
 dmesg( "about to write.table" )
 
-write.table( gene_diff_ex_tab[,-1], 
+write.table( diff_ex_tab[,-1], 
              file=paste( opt$output_dir, opt$output_csvfile, sep="/"), 
              sep="\t", row.names=F )  # remove first column before saving
 
@@ -193,8 +203,8 @@ if ( ( ncond == 2 ) && ! is.null( opt$volcano_plot_file ) )
 
     png( paste( opt$output_dir, opt$volcano_plot_file, sep="/" ) )
 
-    plot( log2( gene_diff_ex_tab$fc ), 
-          -log10( gene_diff_ex_tab$qval ), 
+    plot( log2( diff_ex_tab$fc ), 
+          -log10( diff_ex_tab$qval ), 
           pch=".", col="blue",
           xlab="log2( fold_change )",
           ylab="-log10( q-value )"

@@ -353,13 +353,8 @@ class BallgownUtil:
                                 "from a prokaryote. Ballgown functions only on eukaryotic data."
                                 " Consider using DeSeq2 or CuffDiff instead of BallGown")
 
-    def run_ballgown_diff_exp(self,
-                              rscripts_dir,
-                              sample_dir_group_table_file,
-                              ballgown_output_dir,
-                              output_csv,
-                              volcano_plot_file
-                              ):
+    def run_ballgown_diff_exp(self, rscripts_dir, sample_dir_group_table_file, ballgown_output_dir,
+                              output_csv, volcano_plot_file, data_type):
         """ Make R call to execute the system
 
         :param rscripts_dir:
@@ -388,6 +383,8 @@ class BallgownUtil:
                      '--volcano_plot_file', volcano_plot_file,
                      '--variance_cutoff', 1 
                      ]
+        if data_type == 'transcripts':
+            rcmd_list.append('--transcripts')
         rcmd_str = " ".join(str(x) for x in rcmd_list)
         log("rcmd_string is {0}".format(rcmd_str))
         openedprocess = subprocess.Popen(rcmd_str, shell=True)
@@ -665,7 +662,8 @@ class BallgownUtil:
                                        sample_dir_group_file,
                                        ballgown_output_dir,
                                        output_csv,
-                                       volcano_plot_file)
+                                       volcano_plot_file,
+                                       params.get('input_type', 'genes'))
 
             log("back from run_ballgown_diff_exp, about to load diff exp matrix file")
             # diff_expr_matrix = self.load_diff_expr_matrix(ballgown_output_dir,

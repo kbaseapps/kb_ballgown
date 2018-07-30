@@ -36,6 +36,11 @@ parameters :
       Differential Expression Matrix Set Suffix
     short-hint : |
       Provide a suffix for the differential expression analysis output object name
+  input_type:
+    ui-name : |
+      Data Type
+    short-hint : |
+      Should CuffDiff be run on the gene or transcript level?
   run_all_combinations:
     ui-name : |
       Run All Paired Condition Combinations

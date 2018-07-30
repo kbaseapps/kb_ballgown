@@ -1,3 +1,7 @@
+### Version 2.1.0
+
+- Adds in variance cutoff of 1
+- Adds in the option to select genes or transcript information as output
 
 ### Version 2.0.0
 - Since the installation of R, Bioconductor and Ballgown has been unstable, a version of Docker image
