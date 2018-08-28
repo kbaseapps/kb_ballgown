@@ -31,11 +31,11 @@ parameters :
       Expression Set
     short-hint : |
       Select the expression set associated with transcripts assembled by Cufflinks or StringTie
-  diff_expression_matrix_set_suffix :
+  diff_expression_matrix_set_name :
     ui-name : |
-      Differential Expression Matrix Set Suffix
+      Differential Expression Matrix Set
     short-hint : |
-      Provide a suffix for the differential expression analysis output object name
+      Provide a name for the differential expression analysis output object
   input_type:
     ui-name : |
       Data Type

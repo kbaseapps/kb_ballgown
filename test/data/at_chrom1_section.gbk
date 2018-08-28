@@ -498,7 +498,6 @@ FEATURES             Location/Qualifiers
                      AEIGSSSLPSDYLVSITSSCESAYDLYPLSPDQLCRRYHPLRRKEHHDDTSRWLRPEL
                      DNGAYIAALLLPQRDDFEVCDSVIFWLSSIISGQREIRQIADIKNSDD"
      gene            complement(13853..20774)
-                     /gene=AT1G29750
                      /locus_tag="RKF1"
                      /note="Probable LRR receptor-like serine/threonine-protein
                      kinase RFK1 [Source:UniProtKB/Swiss-Prot;Acc:Q9FXF2]"
@@ -737,7 +736,6 @@ FEATURES             Location/Qualifiers
                      LRPEVDRKEAEAVIKVALVCSSASPTDRPLMSEVVAMLEGLYPVPESTPGVSRNAGDI
                      RFKAFKDLRRGMENNSKTQCSVKSYPSSSSTSSGAGQAVQERKKEESRP"
      gene            22292..24513
-                     /gene=AT1G29760
                      /locus_tag="SEI2"
                      /note="Seipin-2 [Source:UniProtKB/Swiss-Prot;Acc:F4I340]"
      mRNA            join(22292..23490,23646..24513)
@@ -1278,7 +1276,6 @@ FEATURES             Location/Qualifiers
                      SSQARERIARIALVKPEKARGVEDVILRAAQMGQIVEKVSEERLITLLEQINSQTTKQ
                      TKVTVSTNGAVGWTTIRKEEEYYDVLCISMEISLLC"
      gene            54433..55874
-                     /gene=AT1G29860
                      /locus_tag="WRKY71"
                      /note="Probable WRKY transcription factor 71
                      [Source:UniProtKB/Swiss-Prot;Acc:Q93WV4]"
@@ -1505,7 +1502,6 @@ FEATURES             Location/Qualifiers
                      GQPKLLLSIIPEYPMLNFMLTTAIYVLVSVRLFELTNTLKSVFIPTKDDKRLLHNVIA
                      MAAISFCLYIIGLILLLIPH"
      gene            67956..72211
-                     /gene=AT1G29900
                      /locus_tag="CARB"
                      /note="Carbamoyl-phosphate synthase large chain,
                      chloroplastic [Source:UniProtKB/Swiss-Prot;Acc:Q42601]"
@@ -1568,7 +1564,6 @@ FEATURES             Location/Qualifiers
                      KGIPVERVLKLHEGRPHAADMVANGQIHLMLITSSGDALDQKDGRQLRQMALAYKVPV
                      ITTVAGALATAEGIKSLKSSAIKMTALQDFFEVKNVSSLLV"
      gene            complement(72280..73502)
-                     /gene=AT1G29910
                      /locus_tag="LHCB1.1"
                      /note="Chlorophyll a-b binding protein 3, chloroplastic
                      [Source:UniProtKB/Swiss-Prot;Acc:Q8VZ87]"
@@ -1615,7 +1610,6 @@ FEATURES             Location/Qualifiers
                      IWATQVILMGAVEGYRVAGNGPLGEAEDLLYPGGSFDPLGLATDPEAFAELKVKELKN
                      GRLAMFSMFGFFVQAIVTGKGPIENLADHLADPVNNNAWAFATNFVPGK"
      gene            complement(74656..75969)
-                     /gene=AT1G29920
                      /locus_tag="LHCB1.2"
                      /note="Chlorophyll a-b binding protein 3, chloroplastic
                      [Source:UniProtKB/Swiss-Prot;Acc:Q8VZ87]"
@@ -1662,7 +1656,6 @@ FEATURES             Location/Qualifiers
                      IWATQVILMGAVEGYRVAGNGPLGEAEDLLYPGGSFDPLGLATDPEAFAELKVKELKN
                      GRLAMFSMFGFFVQAIVTGKGPIENLADHLADPVNNNAWAFATNFVPGK"
      gene            77885..79114
-                     /gene=AT1G29930
                      /locus_tag="LHCB1.3"
                      /note="Chlorophyll a-b binding protein 1, chloroplastic
                      [Source:UniProtKB/Swiss-Prot;Acc:P04778]"
@@ -1712,7 +1705,6 @@ FEATURES             Location/Qualifiers
                      IWATQVILMGAVEGYRVAGNGPLGEAEDLLYPGGSFDPLGLATDPEAFAELKVKELKN
                      GRLAMFSMFGFFVQAIVTGKGPIENLADHLADPVNNNAWAFATNFVPGK"
      gene            complement(79007..86824)
-                     /gene=AT1G29940
                      /locus_tag="NRPA2"
                      /note="DNA-directed RNA polymerase I subunit 2
                      [Source:UniProtKB/Swiss-Prot;Acc:F4I366]"
@@ -1832,7 +1824,6 @@ FEATURES             Location/Qualifiers
                      /note="lncRNA"
                      /note="transcript_id=AT1G06303.1"
      gene            91698..94598
-                     /gene=AT1G29950
                      /locus_tag="BHLH144"
                      /note="Transcription factor bHLH144
                      [Source:UniProtKB/Swiss-Prot;Acc:Q9ASX9]"
@@ -1976,7 +1967,6 @@ FEATURES             Location/Qualifiers
                      ELCKVYNRLVEEITVEEVKLKKTAALAEMMPMNEDAWWKVDPNDVKDREEVKKMMEKH
                      QELYEKLCEEAASRIKRGHDENNNK"
      gene            complement(98310..99462)
-                     /gene=AT1G29965
                      /locus_tag="RPL18AA"
                      /note="60S ribosomal protein L18a-1
                      [Source:UniProtKB/Swiss-Prot;Acc:Q8L7K0]"
@@ -2187,7 +2177,6 @@ FEATURES             Location/Qualifiers
                      ELVLKELDLLEEDANVYKLIGPVLVKQDLAEANANVRKRIEYISAELKRLDAILQDME
                      EKQNNKRETIMKLQQRLQTIQAGKAKA"
      gene            complement(109156..112558)
-                     /gene=AT1G30000
                      /locus_tag="MNS3"
                      /note="Mannosyl-oligosaccharide 1,2-alpha-mannosidase MNS3
                      [Source:UniProtKB/Swiss-Prot;Acc:Q93Y37]"
@@ -2331,7 +2320,6 @@ FEATURES             Location/Qualifiers
                      DMTEVGYNKTKGFVWMRMRSKIEHTFREIGRRVLYDTEITAFVEDRRMRRLTGVKSKE
                      LMIWVPVNDIFIKRKILRRSPLLIPPACHEHLKFQHFNVRVDKLKEKRSNQTSLM"
      gene            137457..140044
-                     /gene=AT1G30040
                      /locus_tag="GA2OX2"
                      /note="Gibberellin 2-beta-dioxygenase 2
                      [Source:UniProtKB/Swiss-Prot;Acc:Q9XFR9]"
@@ -2573,7 +2561,6 @@ FEATURES             Location/Qualifiers
                      PEQICRPFAVNCYGNRVYVVGRNLHLAVGNIWQSENKFAVRWEVVESPERYADITPSN
                      SQILFA"
      gene            171310..173365
-                     /gene=AT1G30100
                      /locus_tag="NCED5"
                      /note="Probable 9-cis-epoxycarotenoid dioxygenase NCED5,
                      chloroplastic [Source:UniProtKB/Swiss-Prot;Acc:Q9C6Z1]"
@@ -2612,7 +2599,6 @@ FEATURES             Location/Qualifiers
                      HFYGGKKYGGEPFFLPRGLESDGEDDGYIMSFVHDEESWESELHIVNAVTLELEATVK
                      LPSRVPYGFHGTFVNSADMLNQA"
      gene            181735..184152
-                     /gene=AT1G30110
                      /locus_tag="NUDT25"
                      /note="Nudix hydrolase 25 [Source:UniProtKB/Swiss-
                      Prot;Acc:Q9C6Z2]"
@@ -2680,7 +2666,6 @@ FEATURES             Location/Qualifiers
                      YLVRLRNDEDEKEINLANNEADSEFAEWKWAKPEEVVEQAVDYKRPTYEEVIKTFGSF
                      LNDTGRAAKCKSAKW"
      gene            complement(184105..186680)
-                     /gene=AT1G30120
                      /locus_tag="PDH-E1 BETA"
                      /note="Pyruvate dehydrogenase E1 component subunit beta-2,
                      chloroplastic [Source:UniProtKB/Swiss-Prot;Acc:Q9C6Z3]"
@@ -2811,7 +2796,6 @@ FEATURES             Location/Qualifiers
                      /note="lncRNA"
                      /note="transcript_id=AT1G06307.1"
      gene            196352..197341
-                     /gene=AT1G30135
                      /locus_tag="TIFY5A"
                      /note="Protein TIFY 5A [Source:UniProtKB/Swiss-
                      Prot;Acc:Q8LBM2]"
