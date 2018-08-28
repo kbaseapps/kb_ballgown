@@ -627,15 +627,12 @@ class kb_ballgownTest(unittest.TestCase):
         cls.kbasesets_expression_set_ref = expression_set_info['set_ref']
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-
-
     def test_run_all_combinations_rnaseq_ballgown(self):
 
         input_params = {
             #'expressionset_ref': "30996/40/1",
             'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
+            'diff_expression_matrix_set_name': 'all_combinations_rnaseq',
             'workspace_name': self.wsName,
             "run_all_combinations": 1,
             "condition_pair_subset": [],
@@ -652,8 +649,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             'expressionset_ref': "30996/40/1",
             #'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix": "downsized_RNASeq_AT_differential_expression_object",
+            'diff_expression_matrix_set_name': 'all_combinations_transcripts',
             'workspace_name': self.wsName,
             "run_all_combinations": 1,
             "condition_pair_subset": [],
@@ -670,9 +666,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.kbasesets_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix":
-                "downsized_KBaseSets_AT_differential_expression_object",
+            'diff_expression_matrix_set_name': 'all_combinations_kbasesets',
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
             "run_all_combinations": 1,
@@ -685,14 +679,12 @@ class kb_ballgownTest(unittest.TestCase):
         self.assertEqual(4, len(result))
         print('Results: ' + str(result))
 
-
     def test_run_subset_combinations_kbasesets_ballgown(self):
 
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix":
+            "diff_expression_matrix_set_name":
                 "downsized_KBaseSets_AT_differential_expression_object",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
@@ -728,8 +720,6 @@ class kb_ballgownTest(unittest.TestCase):
             #'expressionset_ref': "23748/19/1",
             'expressionset_ref': self.__class__.rnaseq_expression_set_ref,
             'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix":
-                "downsized_RNASeq_AT_differential_expression_object",
             'workspace_name': self.wsName,
             'run_all_combinations': 0,
             "condition_pair_subset": [{'condition': 'hy5'},
@@ -746,9 +736,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix":
-                "downsized_KBaseSets_AT_differential_expression_object",
+            "diff_expression_matrix_set_name": "no_condition_pair",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
             "run_all_combinations": 0,
@@ -768,9 +756,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix":
-                "downsized_KBaseSets_AT_differential_expression_object",
+            "diff_expression_matrix_set_name": "both_condition_options",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
             "run_all_combinations": 1,
@@ -797,9 +783,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix":
-                "downsized_KBaseSets_AT_differential_expression_object",
+            "diff_expression_matrix_set_name": "single_condition_ballgown",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
             "run_all_combinations": 0,
@@ -820,9 +804,7 @@ class kb_ballgownTest(unittest.TestCase):
         input_params = {
             #"expressionset_ref": "23192/112/1",
             "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
-            'diff_expression_matrix_set_name': 'MyDiffExpression',
-            "diff_expression_matrix_set_suffix":
-                "downsized_KBaseSets_AT_differential_expression_object",
+            "diff_expression_matrix_set_name": "invalid_condition",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
             "run_all_combinations": 0,
