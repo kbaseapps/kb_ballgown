@@ -1,3 +1,6 @@
+### Version 2.1.1
+- added citation in PLOS format
+
 ### Version 2.1.0
 
 - Adds in variance cutoff of 1
@@ -13,7 +16,7 @@ been added too.
     - Dockerfile_base - Dockerfile to create the kb_ballgown_base to reinstall a different version of
                         Ballgown, if needed and create kb_ballgown_base image again.
     - create_ballgown_base.md - Instructions for creating the kb_ballgown_base image, and how to use it.
-    
+
 ### Version 1.0.3
 __Changes__
 - added App icon
