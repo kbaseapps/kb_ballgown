@@ -65,9 +65,14 @@ description : |
     <p>It is mandatory to select the "Library Type", "Domain", "RNA-seq Sample and Condition Labels" and provide the "RNA-seq Sample Set" (RNASeqSampleSet object name). All replicates for the same condition must have same label.</p>
 
     <p>Users can optionally fill in additional metadata information in the advanced options.</p>
-    
+
     <p><b>Note: Ballgown requires at least one intron to function. Also, this app will not work on prokaryotes.</b></p>
 
     <p><strong>Team members who developed & deployed algorithm in KBase:</strong>
     Srividya Ramakrishnan, Sunita Kumari, Shinjae Yoo, Priya Ranjan, Jim Thomason, Vivek Kumar, Arfath Pasha. For questions, please <a href="http://kbase.us/contact-us/">contact us</a>.</p>
-    
+
+publications :
+    -
+        display-text: |
+            Fu J, Frazee AC, Collado-Torres L, Jaffe AE, Leek JT (2018). ballgown: Flexible, isoform-level differential expression analysis. R package version 2.12.0.
+        link: http://www.bioconductor.org/packages/release/bioc/html/ballgown.html
