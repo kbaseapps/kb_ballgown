@@ -48,8 +48,8 @@ class MultiGroup:
             for jj in range(1, len(condition_expression_map)):
                 if jj > ii:
                     pairwise_group = list()
-                    pairwise_group.extend(condition_expression_map[ii].values()[0])  # add expression replicates from first condition
-                    pairwise_group.extend(condition_expression_map[jj].values()[0])  # add expression replicates from second condition
+                    pairwise_group.extend(list(condition_expression_map[ii].values())[0])  # add expression replicates from first condition
+                    pairwise_group.extend(list(condition_expression_map[jj].values())[0])  # add expression replicates from second condition
                     pairwise_groups.append(pairwise_group)
 
         return pairwise_groups

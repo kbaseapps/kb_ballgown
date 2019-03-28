@@ -3,29 +3,25 @@ import os  # noqa: F401
 import shutil
 import time
 import unittest
+from configparser import ConfigParser  # py3
 from os import environ
 from pprint import pprint  # noqa: F401
 
 import requests
 from nose.tools import raises
 
-try:
-    from ConfigParser import ConfigParser  # py2
-except BaseException:
-    from configparser import ConfigParser  # py3
-
-from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport
-from biokbase.workspace.client import Workspace as workspaceService
-from DataFileUtil.DataFileUtilClient import DataFileUtil
-from ExpressionUtils.ExpressionUtilsClient import ExpressionUtils
-from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
+from installed_clients.AbstractHandleClient import AbstractHandle as HandleService
+from installed_clients.DataFileUtilClient import DataFileUtil
+from installed_clients.ExpressionUtilsClient import ExpressionUtils
+from installed_clients.GenomeFileUtilClient import GenomeFileUtil
+from installed_clients.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
+from installed_clients.ReadsUtilsClient import ReadsUtils
+from installed_clients.SetAPIClient import SetAPI
+from installed_clients.WorkspaceClient import Workspace as workspaceService
 from kb_ballgown.authclient import KBaseAuth as _KBaseAuth
 from kb_ballgown.core.ballgown_util import BallgownUtil
 from kb_ballgown.kb_ballgownImpl import kb_ballgown
 from kb_ballgown.kb_ballgownServer import MethodContext
-from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
-from ReadsUtils.ReadsUtilsClient import ReadsUtils
-from SetAPI.SetAPIClient import SetAPI
 
 
 class kb_ballgownTest(unittest.TestCase):
@@ -726,16 +722,14 @@ class kb_ballgownTest(unittest.TestCase):
                                       {'condition': 'hy5'}]
         }
 
-        try:
+        with self.assertRaisesRegex(ValueError, "At least two unique conditions must be specified."):
             self.getImpl().run_ballgown_app(self.getContext(), input_params)
-        except Exception as ex:
-            self.assertEquals("At least two unique conditions must be specified. ", ex.message)
 
     def test_no_condition_pair_ballgown(self):
 
         input_params = {
             #"expressionset_ref": "23192/112/1",
-            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "expressionset_ref": self.kbasesets_expression_set_ref,
             "diff_expression_matrix_set_name": "no_condition_pair",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
@@ -743,19 +737,16 @@ class kb_ballgownTest(unittest.TestCase):
             "condition_pair_subset": []
         }
 
-        try:
+        with self.assertRaisesRegex(ValueError, "'Run All Paired Condition Combinations' or "
+                                                "provide subset of condition pairs."):
             self.getImpl().run_ballgown_app(self.getContext(), input_params)
-        except Exception as ex:
-            self.assertEquals("Invalid input:\nselect 'Run All Paired Condition Combinations' "
-                              "or provide subset of condition pairs. Don't provide both, "
-                              "or neither.", ex.message)
 
     def test_both_condition_options_ballgown(self):
 
         # both run_all_combinations and condition_pair_subset are specified
         input_params = {
             #"expressionset_ref": "23192/112/1",
-            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "expressionset_ref": self.kbasesets_expression_set_ref,
             "diff_expression_matrix_set_name": "both_condition_options",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
@@ -770,19 +761,16 @@ class kb_ballgownTest(unittest.TestCase):
             ]
         }
 
-        try:
+        with self.assertRaisesRegex(ValueError, "'Run All Paired Condition Combinations' or "
+                                                "provide subset of condition pairs."):
             self.getImpl().run_ballgown_app(self.getContext(), input_params)
-        except Exception as ex:
-            self.assertEquals("Invalid input:\nselect 'Run All Paired Condition Combinations' "
-                              "or provide subset of condition pairs. Don't provide both, "
-                              "or neither.", ex.message)
 
     def test_single_condition_ballgown(self):
 
         # only a single condition is specified (min should be two for condition pairs)
         input_params = {
             #"expressionset_ref": "23192/112/1",
-            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "expressionset_ref": self.kbasesets_expression_set_ref,
             "diff_expression_matrix_set_name": "single_condition_ballgown",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
@@ -793,17 +781,15 @@ class kb_ballgownTest(unittest.TestCase):
                 }
             ]
         }
-        try:
+        with self.assertRaisesRegex(ValueError, "At least two unique conditions must be specified."):
             self.getImpl().run_ballgown_app(self.getContext(), input_params)
-        except Exception as ex:
-            self.assertEquals("At least two unique conditions must be specified. ", ex.message)
 
     def test_invalid_condition_ballgown(self):
 
         # invalid condition names
         input_params = {
             #"expressionset_ref": "23192/112/1",
-            "expressionset_ref": self.__class__.kbasesets_expression_set_ref,
+            "expressionset_ref": self.kbasesets_expression_set_ref,
             "diff_expression_matrix_set_name": "invalid_condition",
             #"workspace_name": "arfath:narrative_1498151834637",
             'workspace_name': self.wsName,
@@ -818,8 +804,5 @@ class kb_ballgownTest(unittest.TestCase):
             ]
         }
 
-        try:
+        with self.assertRaisesRegex(ValueError, "is not a valid condition. Must be one of"):
             self.getImpl().run_ballgown_app(self.getContext(), input_params)
-        except Exception as ex:
-            self.assertTrue("is not a valid condition. Must be one of" in ex.message)
-

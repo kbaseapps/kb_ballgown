@@ -1,17 +1,25 @@
 [ {
+  "module_name" : "AbstractHandle",
+  "type" : "core",
+  "file_path" : "https://raw.githubusercontent.com/kbase/handle_service/master/handle_service.spec"
+}, {
   "module_name" : "DataFileUtil",
   "type" : "sdk",
   "version_tag" : "release"
 }, {
   "module_name" : "DifferentialExpressionUtils",
   "type" : "sdk",
-  "version_tag" : "dev"
+  "version_tag" : "release"
 }, {
   "module_name" : "ExpressionUtils",
   "type" : "sdk",
   "version_tag" : "release"
 }, {
   "module_name" : "GenomeFileUtil",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
+  "module_name" : "GenomeSearchUtil",
   "type" : "sdk",
   "version_tag" : "release"
 }, {
