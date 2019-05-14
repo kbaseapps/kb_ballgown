@@ -1,10 +1,10 @@
 #
 # Define basic display information
 #
-name     : Create Differential Expression Matrix using Ballgown - v3.5
+name     : Create Differential ExpressionMatrix using Ballgown - v3.5
 
 tooltip  : |
-    Create differential expression matrix based on a given threshold cutoff (for eukaryotes only)
+    Create a differential ExpressionMatrix in two or more conditions of RNA-seq experiments using the output of StringTie or Cufflinks (for eukaryotes only).
 
 icon: ballgown-yellow.png
 
@@ -30,12 +30,12 @@ parameters :
     ui-name : |
       Expression Set
     short-hint : |
-      Select the expression set associated with transcripts assembled by Cufflinks or StringTie
+      Select the expression set associated with transcripts assembled by StringTie or Cufflinks.
   diff_expression_matrix_set_name :
     ui-name : |
       Differential Expression Matrix Set
     short-hint : |
-      Provide a name for the differential expression analysis output object
+      Provide a name for the differential expression analysis output object.
   input_type:
     ui-name : |
       Data Type
@@ -45,31 +45,26 @@ parameters :
     ui-name : |
       Run All Paired Condition Combinations
     short-hint : |
-      Run All Paired Condition Combinations
+      Run all paired condition combinations.
   condition:
         ui-name : |
             Condition Label
         short-hint : |
-            A set of valid condition labels used in the specified expression set
+            A set of valid condition labels used in the specified expression set.
 
 parameter-groups :
     condition_pair_subset :
         ui-name : OR list a subset of at least two conditions on which to run paired combinations
-        short-hint : Ballgown will run pairwise combinations of condition pairs from the conditions you list (If you choose this option, please uncheck 'Run All Paired Condition Combinations')
+        short-hint : Ballgown will run pairwise combinations of condition pairs from the conditions you list. If you choose this option, please uncheck 'Run All Paired Condition Combinations.'
 
 description : |
-    <p>This App allows users to select the single-end or paired-end read files and provide the metadata for a set of samples to create an RNASeqSampleSet object. Note that the user must provide reads for two or more samples.</p>
+    <p>This App provides differential expression matrix in two or more RNA-seq experiments, using the output of StringTie or Cufflinks. User has an option to choose Ballgown to run on the gene or transcript level by selecting  “gene” or “transcripts” in the DataType parameter. By default, this App runs on all paired conditions combinations and generate the pairwise differential expression for each condition combination.</p>
 
-    <p>Users need to import single-end or paired-end read files to their Narrative before starting this App.</p>
+    <p>The output from this App can be used as an input to run “Create Feature Set/Filtered Expression Matrix From Differential Expression” to get the filtered differential expression genes and filtered differential expression matrix on a given threshold cut off based on adjusted p-value and fold change.</p>
 
-    <p>It is mandatory to select the "Library Type", "Domain", "RNA-seq Sample and Condition Labels" and provide the "RNA-seq Sample Set" (RNASeqSampleSet object name). All replicates for the same condition must have same label.</p>
+    <p><b>Note: Ballgown requires at least one intron to function. Therefore, this App will only work on eukaryotes. </b></p>
 
-    <p>Users can optionally fill in additional metadata information in the advanced options.</p>
-
-    <p><b>Note: Ballgown requires at least one intron to function. Also, this app will not work on prokaryotes.</b></p>
-
-    <p><strong>Team members who developed & deployed algorithm in KBase:</strong>
-    Srividya Ramakrishnan, Sunita Kumari, Shinjae Yoo, Priya Ranjan, Jim Thomason, Vivek Kumar, Arfath Pasha. For questions, please <a href="http://kbase.us/contact-us/">contact us</a>.</p>
+    <p><strong>Team members who developed & deployed algorithm in KBase:</strong> Srividya Ramakrishnan, Sunita Kumari, Shinjae Yoo, Priya Ranjan, Jim Thomason, Vivek Kumar, Arfath Pasha. For questions, please <a href="http://kbase.us/contact-us/">contact us</a>.</p>
 
 publications :
     -
