@@ -1,3 +1,6 @@
+### Version 2.2.0
+- Update to python 3
+
 ### Version 2.1.1
 - added citation in PLOS format
 

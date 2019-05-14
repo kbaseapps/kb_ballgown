@@ -1,32 +1,25 @@
+import csv
+import errno
 import glob
-import re
-import time
 import json
+import logging
 import os
+import re
+import shutil
+import subprocess
 import traceback
 import uuid
-import errno
-import subprocess
 import zipfile
-import shutil
-import csv
-
 from pprint import pprint
 
-from DataFileUtil.DataFileUtilClient import DataFileUtil
-from Workspace.WorkspaceClient import Workspace as Workspace
-from KBaseReport.KBaseReportClient import KBaseReport
-from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
-from KBaseFeatureValues.KBaseFeatureValuesClient import KBaseFeatureValues
-from DifferentialExpressionUtils.DifferentialExpressionUtilsClient import \
+from installed_clients.DataFileUtilClient import DataFileUtil
+from installed_clients.DifferentialExpressionUtilsClient import \
     DifferentialExpressionUtils
+from installed_clients.KBaseFeatureValuesClient import KBaseFeatureValues
+from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
+from installed_clients.WorkspaceClient import Workspace as Workspace
 from kb_ballgown.core.multi_group import MultiGroup
-
-
-def log(message, prefix_newline=False):
-    """Logging function, provides a hook to suppress or redirect log messages."""
-    print(('\n' if prefix_newline else '') + '{0:.2f}'.format(time.time()) + ': ' + str(message))
-
 
 TOOL_NAME = 'Ballgown'
 TOOL_VERSION = '2.8.0'
@@ -56,7 +49,7 @@ class BallgownUtil:
                 validates params passed to run_ballgown_app method
         """
 
-        log('start validating run_ballgown_app params')
+        logging.info('start validating run_ballgown_app params')
 
         # check for required parameters
         for p in ['expressionset_ref', 'diff_expression_matrix_set_name',
@@ -91,11 +84,11 @@ class BallgownUtil:
         _generate_html_report: generate html summary report
         """
 
-        log('start generating html report')
+        logging.info('start generating html report')
         html_report = list()
 
         output_directory = os.path.join(self.scratch, str(uuid.uuid4()))
-        self._mkdir_p(output_directory)
+        os.makedirs(output_directory, exist_ok=True)
         result_file_path = os.path.join(output_directory, 'report.html')
 
         for file in glob.glob(os.path.join(result_directory, '*.tsv')):
@@ -106,9 +99,9 @@ class BallgownUtil:
             shutil.copy(file, output_directory)
 
         diff_expr_set = self.ws.get_objects2({'objects':
-                                              [{'ref':
-                                                diff_expression_matrix_set_ref[
-                                                    'diffExprMatrixSet_ref']}]})['data'][0]
+                                                  [{'ref':
+                                                        diff_expression_matrix_set_ref[
+                                                            'diffExprMatrixSet_ref']}]})['data'][0]
         diff_expr_set_data = diff_expr_set['data']
         diff_expr_set_info = diff_expr_set['info']
         diff_expr_set_name = diff_expr_set_info[1]
@@ -132,7 +125,7 @@ class BallgownUtil:
 
         for item in diff_expr_set_data['items']:
             item_diffexprmatrix_object = self.ws.get_objects2({'objects':
-                                                               [{'ref': item['ref']}]})[
+                                                                   [{'ref': item['ref']}]})[
                 'data'][0]
             item_diffexprmatrix_info = item_diffexprmatrix_object['info']
             item_diffexprmatrix_data = item_diffexprmatrix_object['data']
@@ -140,10 +133,10 @@ class BallgownUtil:
 
             overview_content += '<tr><td>{} ({})</td>'.format(diffexprmatrix_name,
                                                               item['ref'])
-            overview_content += '<td>{}</td>'.format(item_diffexprmatrix_data.
-                                                     get('condition_mapping').keys()[0])
-            overview_content += '<td>{}</td>'.format(item_diffexprmatrix_data.
-                                                     get('condition_mapping').values()[0])
+            overview_content += '<td>{}</td>'.format(list(item_diffexprmatrix_data.
+                                                          get('condition_mapping').keys())[0])
+            overview_content += '<td>{}</td>'.format(list(item_diffexprmatrix_data.
+                                                          get('condition_mapping').values())[0])
             overview_content += '</tr>'
         overview_content += '</table>'
 
@@ -155,7 +148,7 @@ class BallgownUtil:
             image_content += '<p style="text-align:center"><img align="center" src="{}" ' \
                              'width="600" height="400"></a><a target="_blank"><br>' \
                              '<p align="center">{}</p></p>'.format(
-                                 image, caption)
+                image, caption)
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
@@ -180,11 +173,11 @@ class BallgownUtil:
         """
         _generate_output_file_list: zip result files and generate file_links for report
         """
-        log('Start packing result files')
+        logging.info('Start packing result files')
         output_files = list()
 
         output_directory = os.path.join(self.scratch, str(uuid.uuid4()))
-        self._mkdir_p(output_directory)
+        os.makedirs(output_directory, exist_ok=True)
         result_file = os.path.join(output_directory, 'ballgown_result.zip')
 
         with zipfile.ZipFile(result_file, 'w',
@@ -208,7 +201,7 @@ class BallgownUtil:
         """
         _generate_report: generate summary report
         """
-        log('creating report')
+        logging.info('creating report')
 
         output_files = self._generate_output_file_list(result_directory)
 
@@ -252,11 +245,11 @@ class BallgownUtil:
         for group in condition_labels:
             if group_counts[group] < 2:
                 raise Exception(
-                    "Condition group {0} has less than 2 members; ballgown will not run. "
-                    "At least two condition groups are needed for this analysis. ".format(group))
+                    f"Condition group {group} has less than 2 members; ballgown will not run. "
+                    "At least two condition groups are needed for this analysis. ")
 
         group_file_dir = os.path.join(self.scratch, str(uuid.uuid4()))
-        self._mkdir_p(group_file_dir)
+        os.makedirs(group_file_dir, exist_ok=True)
 
         try:
             condition_labels_uniqued = list(set(condition_labels))
@@ -266,25 +259,23 @@ class BallgownUtil:
             sgf = open(sgf_name, "w")
         except Exception:
             raise Exception(
-                "Can't open file {0} for writing {1}".format(
-                    sgf_name, traceback.format_exc()))
+                f"Can't open file {sgf_name} for writing {traceback.format_exc()}")
 
         index = 0  # condition label index
         for ii in mapped_expression_ids:
-            for alignment_id, expression_id in ii.items():
+            for alignment_id, expression_id in list(ii.items()):
                 expression_object = self.ws.get_objects2(
                     {'objects':
-                     [{'ref': expression_id}]})['data'][0]
+                         [{'ref': expression_id}]})['data'][0]
                 handle_id = expression_object['data']['file']['hid']
                 expression_name = expression_object['info'][1]
 
                 expression_dir = os.path.join(group_file_dir, expression_name)
-                self._mkdir_p(expression_dir)
+                os.makedirs(expression_dir, exist_ok=True)
 
-                print('expression_name: ' + str(expression_dir) + ' ' +
-                      str(group_name_indices[condition_labels[index]]))
-                sgf.write("{0}  {1}\n".format(expression_dir,
-                                              group_name_indices[condition_labels[index]]))
+                print(f'expression_name: {expression_dir} '
+                      f'{group_name_indices[condition_labels[index]]}')
+                sgf.write(f"{expression_dir}  {group_name_indices[condition_labels[index]]}\n")
 
                 self.dfu.shock_to_file({'handle_id': handle_id,
                                         'file_path': expression_dir,
@@ -315,7 +306,7 @@ class BallgownUtil:
             shutil.rmtree(directory, ignore_errors=True)
             # need to iterate each entry
         except IOError as e:
-            log("Unable to remove working directory {0}".format(directory))
+            logging.info("Unable to remove working directory {0}".format(directory))
             raise
 
     def _setupWorkingDir(self, directory=None):
@@ -327,7 +318,7 @@ class BallgownUtil:
                 self._cleanup(directory)
             os.mkdir(directory)
         except IOError:
-            log("Unable to setup working dir {0}".format(directory))
+            logging.info("Unable to setup working dir {0}".format(directory))
             raise
 
     def _check_intron_measurements(self, sample_dir_group_table_file):
@@ -336,12 +327,12 @@ class BallgownUtil:
         :param sample_dir_group_table_file:
         :return:
         """
-        log('checking for intron level measurements... ')
+        logging.info('checking for intron level measurements... ')
         file = open(sample_dir_group_table_file, 'r')
         textFileLines = file.readlines()
         for line in textFileLines:
             expr_dir = line.split()[0]
-            log(expr_dir)
+            logging.info(expr_dir)
             i2t_file = open(os.path.join(expr_dir, 'i2t.ctab'), 'r')
             if len(i2t_file.readlines()) <= 1:  # only header line exists
                 raise Exception("No intron measurements found! Input expressions are possibly "
@@ -381,18 +372,18 @@ class BallgownUtil:
                      '--output_dir', ballgown_output_dir,
                      '--output_csvfile', output_csv,
                      '--volcano_plot_file', volcano_plot_file,
-                     '--variance_cutoff', 1 
+                     '--variance_cutoff', 1
                      ]
         if data_type == 'transcripts':
             rcmd_list.append('--transcripts')
         rcmd_str = " ".join(str(x) for x in rcmd_list)
-        log("rcmd_string is {0}".format(rcmd_str))
+        logging.info("rcmd_string is {0}".format(rcmd_str))
         openedprocess = subprocess.Popen(rcmd_str, shell=True)
         openedprocess.wait()
         # Make sure the openedprocess.returncode is zero (0)
         if openedprocess.returncode != 0:
-            log("R script did not return normally, return code - "
-                + str(openedprocess.returncode))
+            logging.info("R script did not return normally, return code - "
+                         + str(openedprocess.returncode))
             raise Exception("Rscript failure")
 
     def load_diff_expr_matrix(self, ballgown_output_dir, output_csv):
@@ -418,19 +409,19 @@ class BallgownUtil:
             csv_rows = csv.reader(csv_file, delimiter="\t", quotechar='"')
             for row in csv_rows:
                 n = n + 1
-                if (n == 1):
-                    if (row != ['id', 'fc', 'pval', 'qval']):
+                if n == 1:
+                    if row != ['id', 'fc', 'pval', 'qval']:
                         raise Exception(
                             "did not get expected column heading from {0}".format(
                                 diff_matrix_file))
                 else:
-                    if (len(row) != 4):
+                    if len(row) != 4:
                         raise Exception(
                             "did not get 4 elements in row {0} of csv file {1} ".format(
                                 n, diff_matrix_file))
                     key = row[0]
                     # put in checks for NA or numeric for row[1] through 4
-                    if (key in dm):
+                    if key in dm:
                         raise Exception(
                             "duplicate key {0} in row {1} of csv file {2} ".format(
                                 key, n, diff_matrix_file))
@@ -455,10 +446,10 @@ class BallgownUtil:
         transform['genome_id'] = expression_obj[0]['data']['genome_id']
 
         # get sampleset_id
-        #alignment_ref = expression_obj[0]['data']['mapped_rnaseq_alignment'].values()[0]
-        #wsid, objid, ver = alignment_ref.split('/')
-        #alignment_obj = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])
-        #transform['sampleset_id'] = alignment_obj[0]['data']['sampleset_id']
+        # alignment_ref = expression_obj[0]['data']['mapped_rnaseq_alignment'].values()[0]
+        # wsid, objid, ver = alignment_ref.split('/')
+        # alignment_obj = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])
+        # transform['sampleset_id'] = alignment_obj[0]['data']['sampleset_id']
 
         # build mapped_expression_ids
         mapped_expression_ids = list()
@@ -466,7 +457,7 @@ class BallgownUtil:
             expression_ref = item['ref']
             wsid, objid, ver = expression_ref.split('/')
             expression_obj = self.ws.get_objects([{'objid': objid, 'wsid': wsid}])
-            alignment_ref = expression_obj[0]['data']['mapped_rnaseq_alignment'].values()[0]
+            alignment_ref = list(expression_obj[0]['data']['mapped_rnaseq_alignment'].values())[0]
             mapped_expression_ids.append({alignment_ref: expression_ref})
         transform['mapped_expression_ids'] = mapped_expression_ids
 
@@ -485,8 +476,7 @@ class BallgownUtil:
         for ii in mapped_expression_ids:
             for alignment_id, expression_id in ii.items():
                 expression_object = self.ws.get_objects2(
-                    {'objects':
-                     [{'ref': expression_id}]})['data'][0]
+                    {'objects': [{'ref': expression_id}]})['data'][0]
                 condition_labels.append(expression_object['data']['condition'])
 
         return condition_labels
@@ -556,8 +546,8 @@ class BallgownUtil:
             report_name: report name generated by KBaseReport
             report_ref: report reference generated by KBaseReport
         """
-        log('--->\nrunning BallgownUtil.run_ballgown_app\n' +
-            'params:\n{}'.format(json.dumps(params, indent=1)))
+        logging.info('--->\nrunning BallgownUtil.run_ballgown_app\n' +
+                     f'params:\n{json.dumps(params, indent=1)}')
 
         self._validate_run_ballgown_app_params(params)
 
@@ -580,18 +570,18 @@ class BallgownUtil:
             params['diff_expression_matrix_set_name'] = expression_name + \
                 differential_expression_suffix
 
-        log('--->\nexpression object type: \n' +
+        logging.info('--->\nexpression object type: \n' +
             '{}'.format(expression_object_type))"""
 
         if re.match('KBaseRNASeq.RNASeqExpressionSet-\d.\d', expression_object_type):
             expression_set_data = self.ws.get_objects2(
                 {'objects':
-                 [{'ref': expressionset_ref}]})['data'][0]['data']
+                     [{'ref': expressionset_ref}]})['data'][0]['data']
 
         elif re.match('KBaseSets.ExpressionSet-\d.\d', expression_object_type):
             expression_set_data = self.ws.get_objects2(
                 {'objects':
-                 [{'ref': expressionset_ref}]})['data'][0]['data']
+                     [{'ref': expressionset_ref}]})['data'][0]['data']
 
             expression_set_data = self._transform_expression_set_data(expression_set_data)
 
@@ -600,7 +590,7 @@ class BallgownUtil:
             expression_set_data['mapped_expression_ids'])
 
         ballgown_output_dir = os.path.join(self.scratch, "ballgown_out")
-        log("ballgown output dir is {0}".format(ballgown_output_dir))
+        logging.info("ballgown output dir is {0}".format(ballgown_output_dir))
         self._setupWorkingDir(ballgown_output_dir)
 
         # get set of all condition labels
@@ -619,8 +609,8 @@ class BallgownUtil:
                     if condition.get('condition').strip() not in requested_condition_labels:
                         requested_condition_labels.append(condition.get('condition').strip())
 
-        log("User requested pairwise combinations from condition label list : " +
-            str(requested_condition_labels))
+        logging.info("User requested pairwise combinations from condition label list : " +
+                     str(requested_condition_labels))
 
         diff_expr_files = list()
 
@@ -636,7 +626,7 @@ class BallgownUtil:
             skip = False
             for condition in condition_labels:
                 if condition not in requested_condition_labels:
-                    log("skipping " + str(condition_labels))
+                    logging.info("skipping " + str(condition_labels))
                     skip = True
             if skip:
                 continue
@@ -644,7 +634,7 @@ class BallgownUtil:
             sample_dir_group_file = self.get_sample_dir_group_file(mapped_expression_ids,
                                                                    condition_labels)
 
-            log("about to run_ballgown_diff_exp")
+            logging.info("about to run_ballgown_diff_exp")
             rscripts_dir = '/kb/module/rscripts'
 
             condition_labels_uniqued = list()
@@ -652,10 +642,9 @@ class BallgownUtil:
                 if condition not in condition_labels_uniqued:
                     condition_labels_uniqued.append(condition)
 
-            output_csv = 'ballgown_diffexp_' + \
-                condition_labels_uniqued[0] + '_' + condition_labels_uniqued[1] + '.tsv'
-            volcano_plot_file = 'volcano_plot_' + \
-                condition_labels_uniqued[0] + '_' + condition_labels_uniqued[1] + '.png'
+            output_csv = f'ballgown_diffexp_{condition_labels_uniqued[0]}_{condition_labels_uniqued[1]}.tsv'
+            volcano_plot_file = f'volcano_plot_{condition_labels_uniqued[0]}_{condition_labels_uniqued[1]}.png'
+
 
             self.run_ballgown_diff_exp(rscripts_dir,
                                        sample_dir_group_file,
@@ -664,7 +653,7 @@ class BallgownUtil:
                                        volcano_plot_file,
                                        params.get('input_type', 'genes'))
 
-            log("back from run_ballgown_diff_exp, about to load diff exp matrix file")
+            logging.info("back from run_ballgown_diff_exp, about to load diff exp matrix file")
             # diff_expr_matrix = self.load_diff_expr_matrix(ballgown_output_dir,
             # output_csv)  # read file before its zipped
 
@@ -672,14 +661,14 @@ class BallgownUtil:
 
             diff_expr_file = dict()
             diff_expr_file.update({'condition_mapping':
-                                   {condition_labels_uniqued[0]: condition_labels_uniqued[1]}})
+                                       {condition_labels_uniqued[0]: condition_labels_uniqued[1]}})
             diff_expr_file.update(
                 {'diffexpr_filepath': os.path.join(ballgown_output_dir, output_csv)})
             diff_expr_files.append(diff_expr_file)
 
         deu_param = {
             'destination_ref': params['workspace_name'] + '/' +
-            params['diff_expression_matrix_set_name'],
+                               params['diff_expression_matrix_set_name'],
             'diffexpr_data': diff_expr_files,
             'tool_used': TOOL_NAME,
             'tool_version': TOOL_VERSION,

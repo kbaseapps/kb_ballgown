@@ -2,6 +2,7 @@
 #BEGIN_HEADER
 import os
 import json
+import logging
 from kb_ballgown.core.ballgown_util import BallgownUtil
 #END_HEADER
 
@@ -21,9 +22,9 @@ class kb_ballgown:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "2.0.0"
+    VERSION = "2.2.0"
     GIT_URL = "https://github.com/kbaseapps/kb_ballgown.git"
-    GIT_COMMIT_HASH = "51608fc80b999a7f69f0fd8000c53273915bf2c4"
+    GIT_COMMIT_HASH = "5346b109c4a391954188dad612d456cee00e4390"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -35,6 +36,8 @@ class kb_ballgown:
         self.config = config
         self.config['SDK_CALLBACK_URL'] = os.environ['SDK_CALLBACK_URL']
         self.config['KB_AUTH_TOKEN'] = os.environ['KB_AUTH_TOKEN']
+        logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
+                            level=logging.INFO)
         #END_CONSTRUCTOR
         pass
 
@@ -73,11 +76,11 @@ class kb_ballgown:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run_ballgown_app
-        print '--->\nRunning kb_ballgown.run_ballgown_app\nparams:'
-        print json.dumps(params, indent=1)
+        print('--->\nRunning kb_ballgown.run_ballgown_app\nparams:')
+        print(json.dumps(params, indent=1))
 
-        for key, value in params.iteritems():
-            if isinstance(value, basestring):
+        for key, value in params.items():
+            if isinstance(value, str):
                 params[key] = value.strip()
 
         ballgown_runner = BallgownUtil(self.config)

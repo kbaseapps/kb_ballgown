@@ -12,10 +12,9 @@ from __future__ import print_function
 try:
     # baseclient and this client are in a package
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
-except:
+except ImportError:
     # no they aren't
     from baseclient import BaseClient as _BaseClient  # @Reimport
-import time
 
 
 class DifferentialExpressionUtils(object):
@@ -24,8 +23,8 @@ class DifferentialExpressionUtils(object):
             self, url=None, timeout=30 * 60, user_id=None,
             password=None, token=None, ignore_authrc=False,
             trust_all_ssl_certificates=False,
-            auth_svc='https://kbase.us/services/authorization/Sessions/Login',
-            service_ver='dev',
+            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login',
+            service_ver='release',
             async_job_check_time_ms=100, async_job_check_time_scale_percent=150, 
             async_job_check_max_time_ms=300000):
         if url is None:
@@ -39,14 +38,6 @@ class DifferentialExpressionUtils(object):
             async_job_check_time_ms=async_job_check_time_ms,
             async_job_check_time_scale_percent=async_job_check_time_scale_percent,
             async_job_check_max_time_ms=async_job_check_max_time_ms)
-
-    def _check_job(self, job_id):
-        return self._client._check_job('DifferentialExpressionUtils', job_id)
-
-    def _upload_differentialExpression_submit(self, params, context=None):
-        return self._client._submit_job(
-             'DifferentialExpressionUtils.upload_differentialExpression', [params],
-             self._service_ver, context)
 
     def upload_differentialExpression(self, params, context=None):
         """
@@ -71,22 +62,8 @@ class DifferentialExpressionUtils(object):
            Output from upload differential expression    *) -> structure:
            parameter "diffExprMatrixSet_ref" of String
         """
-        job_id = self._upload_differentialExpression_submit(params, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
-
-    def _save_differential_expression_matrix_set_submit(self, params, context=None):
-        return self._client._submit_job(
-             'DifferentialExpressionUtils.save_differential_expression_matrix_set', [params],
-             self._service_ver, context)
+        return self._client.run_job('DifferentialExpressionUtils.upload_differentialExpression',
+                                    [params], self._service_ver, context)
 
     def save_differential_expression_matrix_set(self, params, context=None):
         """
@@ -115,22 +92,8 @@ class DifferentialExpressionUtils(object):
            Output from upload differential expression    *) -> structure:
            parameter "diffExprMatrixSet_ref" of String
         """
-        job_id = self._save_differential_expression_matrix_set_submit(params, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
-
-    def _download_differentialExpression_submit(self, params, context=None):
-        return self._client._submit_job(
-             'DifferentialExpressionUtils.download_differentialExpression', [params],
-             self._service_ver, context)
+        return self._client.run_job('DifferentialExpressionUtils.save_differential_expression_matrix_set',
+                                    [params], self._service_ver, context)
 
     def download_differentialExpression(self, params, context=None):
         """
@@ -146,22 +109,8 @@ class DifferentialExpressionUtils(object):
            The output of the download method.  *) -> structure: parameter
            "destination_dir" of String
         """
-        job_id = self._download_differentialExpression_submit(params, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
-
-    def _export_differentialExpression_submit(self, params, context=None):
-        return self._client._submit_job(
-             'DifferentialExpressionUtils.export_differentialExpression', [params],
-             self._service_ver, context)
+        return self._client.run_job('DifferentialExpressionUtils.download_differentialExpression',
+                                    [params], self._service_ver, context)
 
     def export_differentialExpression(self, params, context=None):
         """
@@ -175,28 +124,20 @@ class DifferentialExpressionUtils(object):
         :returns: instance of type "ExportOutput" -> structure: parameter
            "shock_id" of String
         """
-        job_id = self._export_differentialExpression_submit(params, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
+        return self._client.run_job('DifferentialExpressionUtils.export_differentialExpression',
+                                    [params], self._service_ver, context)
+
+    def export_diff_expr_matrix_as_tsv(self, params, context=None):
+        """
+        Export DifferenitalExpressionMatrix object as tsv
+        :param params: instance of type "ExportMatrixTSVParams" -> structure:
+           parameter "input_ref" of String
+        :returns: instance of type "ExportMatrixTSVOutput" -> structure:
+           parameter "shock_id" of String
+        """
+        return self._client.run_job('DifferentialExpressionUtils.export_diff_expr_matrix_as_tsv',
+                                    [params], self._service_ver, context)
 
     def status(self, context=None):
-        job_id = self._client._submit_job('DifferentialExpressionUtils.status', 
-            [], self._service_ver, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
+        return self._client.run_job('DifferentialExpressionUtils.status',
+                                    [], self._service_ver, context)
